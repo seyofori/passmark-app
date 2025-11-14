@@ -1,5 +1,5 @@
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons"
-import { Stack } from "expo-router"
+import { Stack, useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 
@@ -9,6 +9,7 @@ export default function HomeScreen() {
     minutes: "00",
     seconds: "00",
   })
+  const router = useRouter()
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -111,14 +112,20 @@ export default function HomeScreen() {
         >
           <Text style={styles.buttonText}>Submit Solution</Text>
         </Pressable>
-        <View style={styles.historyButtonWrapper}>
+        <Pressable
+          style={styles.historyButtonWrapper}
+          onPress={() => router.push("/history")}
+        >
           <FontAwesome name="history" size={16} color="#605b5bff" />
           <Text
-            style={[styles.buttonText, { color: "#605b5bff", marginLeft: 8 }]}
+            style={[
+              styles.buttonText,
+              { color: "#605b5bff", fontWeight: "bold", marginLeft: 8 },
+            ]}
           >
             View History
           </Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   )
