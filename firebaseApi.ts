@@ -157,7 +157,6 @@ export async function submitSolutionForGrading({
     // 2. AI Grading
     const { score, feedback } = await runAiGrading(imageUris, question)
 
-
     // 3. Save grading result
     const gradingResultId = await saveGradingResultToFirestore(
       userId,
@@ -260,6 +259,8 @@ export async function fetchGradingResult(
   const data = docSnap.data() as DocumentData
   return {
     id: docSnap.id,
+    score: typeof data.score === "number" ? data.score : 0,
+    feedback: Array.isArray(data.feedback) ? data.feedback : [],
     ...data,
   }
 }
