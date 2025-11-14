@@ -11,7 +11,8 @@ import {
 } from "react-native"
 
 export default function SubmitSolutionScreen() {
-  const [images, setImages] = useState([1, 2, 3])
+  // Store image URIs (from camera/gallery)
+  const [images, setImages] = useState<string[]>([])
   const router = useRouter()
 
   // Placeholder for image picking logic
@@ -49,9 +50,9 @@ export default function SubmitSolutionScreen() {
           showsHorizontalScrollIndicator={false}
           style={styles.imagesRow}
         >
-          {images.map((img, idx) => (
+          {images.map((uri, idx) => (
             <View key={idx} style={styles.imageWrapper}>
-              <Image source={img} style={styles.image} />
+              <Image source={{ uri }} style={styles.image} />
               <Pressable
                 style={styles.removeButton}
                 onPress={() => handleRemoveImage(idx)}
@@ -67,7 +68,9 @@ export default function SubmitSolutionScreen() {
           style={({ pressed }) => [
             styles.submitButton,
             pressed && { opacity: 0.8 },
+            images.length === 0 && { backgroundColor: "#A5D6A7" },
           ]}
+          disabled={images.length === 0}
           onPress={() => router.push("/grading-result")}
         >
           <Text style={styles.submitButtonText}>Submit for Grading</Text>

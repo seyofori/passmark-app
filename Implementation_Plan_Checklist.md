@@ -97,6 +97,19 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
+## 4. Submit-Your-Solution Screen Implementation
+
+- [ ] Show real images on submit screen
+  - Display images the user takes or selects, not placeholders, on the submit-your-solution screen.
+- [ ] Allow camera and gallery upload
+  - Enable user to take a picture or upload from gallery on the submit-your-solution screen. Integrate with Expo ImagePicker and Camera APIs.
+- [ ] Submit for AI grading
+  - Allow user to submit their solution images for AI grading. Send request to Firebase backend/Cloud Function for grading.
+- [ ] Navigate to grading result with question id
+  - After grading, navigate to grading-result screen with the question id so user can view their grade/result.
+
+---
+
 ## 5. History Screen
 
 ### Tasks
