@@ -39,14 +39,18 @@ export default function GradingResultScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.loadingText, styles.centerMessage]}>Loading result...</Text>
+        <Text style={[styles.loadingText, styles.centerMessage]}>
+          Loading result...
+        </Text>
       </View>
     )
   }
   if (isError) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.errorText, styles.centerMessage]}>Failed to load result.</Text>
+        <Text style={[styles.errorText, styles.centerMessage]}>
+          Failed to load result.
+        </Text>
         <Pressable onPress={onRefresh} style={styles.retryButton}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </Pressable>
@@ -56,7 +60,9 @@ export default function GradingResultScreen() {
   if (!data) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.noDataText, styles.centerMessage]}>No grading result found.</Text>
+        <Text style={[styles.noDataText, styles.centerMessage]}>
+          No grading result found.
+        </Text>
       </View>
     )
   }

@@ -82,6 +82,18 @@ This document outlines the step-by-step plan to integrate TanStack Query (React 
 
 ---
 
+---
+
+## 6. Maestro E2E Tests
+
+- [ ] Add Maestro test flows for:
+  - Home Screen: loading, error, refresh, navigation
+  - History Screen: loading, error, refresh, navigation to detail
+  - History Detail Screen: loading, error, refresh
+  - Grading Result Screen: loading, error, refresh, try again button
+
+---
+
 ## 7. General
 
 - [ ] Ensure all queries use unique keys.
