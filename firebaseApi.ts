@@ -9,6 +9,7 @@ import {
   limit,
   orderBy,
   query,
+  where,
 } from "firebase/firestore"
 import { db } from "./firebaseConfig"
 
@@ -37,8 +38,8 @@ export interface GradingResult {
 // Fetch the daily question (example: from a 'dailyQuestions' collection)
 export async function fetchDailyQuestion(): Promise<DailyQuestion> {
   const q = query(
-    collection(db, "dailyQuestions"),
-    orderBy("date", "desc"),
+    collection(db, "questions"),
+    where("isToday", "==", true),
     limit(1),
   )
   const snapshot = await getDocs(q)

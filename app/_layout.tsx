@@ -82,14 +82,14 @@ export default function RootLayout() {
       } catch (err) {
         console.error("User setup error:", err)
         Alert.alert("User Error", "Failed to initialize user session.")
-        setUserReady(false)
       }
     }
 
-    ;(async () => {
+    async function initializeApp() {
       await setupNotification()
       await setupUser()
-    })()
+    }
+    initializeApp()
   }, [])
 
   if (!fontsLoaded || !userReady) {

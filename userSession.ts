@@ -8,6 +8,7 @@ import { auth } from "./firebaseConfig"
 export interface AppUser {
   userId: string
   createdAt: string
+  streak: number
 }
 
 const USER_KEY = "appUser"
@@ -22,6 +23,7 @@ export async function getOrCreateUser(): Promise<AppUser> {
   const newUser: AppUser = {
     userId: uuidv4(),
     createdAt: new Date().toISOString(),
+    streak: 0,
   }
   await AsyncStorage.setItem(USER_KEY, JSON.stringify(newUser))
   return newUser
