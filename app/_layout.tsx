@@ -2,8 +2,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useFonts } from "expo-font"
 import * as Notifications from "expo-notifications"
 import { Stack } from "expo-router"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Text, View } from "react-native"
+import "react-native-get-random-values"
+import { AppUser, ensureAnonymousSignIn, getOrCreateUser } from "../userSession"
 
 const queryClient = new QueryClient()
 
@@ -11,6 +13,8 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Lexend: require("../assets/fonts/Lexend-VariableFont_wght.ttf"),
   })
+  const [user, setUser] = useState<AppUser | null>(null)
+  const [userReady, setUserReady] = useState(false)
 
   useEffect(() => {
     Notifications.setNotificationHandler({
@@ -34,7 +38,6 @@ export default function RootLayout() {
       const scheduled = await Notifications.getAllScheduledNotificationsAsync()
       const alreadyScheduled = scheduled.some((n) => {
         const t = n.trigger as Notifications.CalendarTriggerInput
-        console.log("scheduled -> ", t)
         return (
           t &&
           t.type === "calendar" &&
@@ -69,10 +72,27 @@ export default function RootLayout() {
         }
       }
     }
-    setupNotification()
+
+    async function setupUser() {
+      try {
+        const u = await getOrCreateUser()
+        setUser(u)
+        await ensureAnonymousSignIn()
+        setUserReady(true)
+      } catch (err) {
+        console.error("User setup error:", err)
+        Alert.alert("User Error", "Failed to initialize user session.")
+        setUserReady(false)
+      }
+    }
+
+    ;(async () => {
+      await setupNotification()
+      await setupUser()
+    })()
   }, [])
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !userReady) {
     return (
       <View
         style={{
@@ -110,5 +130,4 @@ export default function RootLayout() {
     </QueryClientProvider>
   )
 }
-
 
