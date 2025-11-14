@@ -1,8 +1,11 @@
 import { FontAwesome } from "@expo/vector-icons"
+import { useQuery } from "@tanstack/react-query"
 import * as ImagePicker from "expo-image-picker"
 import { Stack, useRouter } from "expo-router"
 import React, { useState } from "react"
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -10,11 +13,19 @@ import {
   Text,
   View,
 } from "react-native"
+import { fetchDailyQuestion, submitSolutionForGrading } from "../firebaseApi"
+import { useUser } from "./UserContext"
 
 export default function SubmitSolutionScreen() {
   // Store image URIs (from camera/gallery)
   const [images, setImages] = useState<string[]>([])
+  const [submitting, setSubmitting] = useState(false)
   const router = useRouter()
+  const { user } = useUser()
+  const { data: dailyQuestion, isLoading: loadingQuestion } = useQuery({
+    queryKey: ["daily-question"],
+    queryFn: fetchDailyQuestion,
+  })
 
   // Placeholder for image picking logic
   const handleTakePhoto = async () => {
@@ -35,7 +46,25 @@ export default function SubmitSolutionScreen() {
       )
     }
   }
-  const handleUploadFromGallery = () => {}
+  const handleUploadFromGallery = async () => {
+    if (images.length >= 5) return
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== "granted") {
+      Alert.alert("Permission Required", "Gallery permission is required to upload images.")
+      return
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.8,
+      selectionLimit: 5 - images.length,
+    })
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImages((prev) =>
+        [...prev, ...result.assets.map((a) => a.uri)].slice(0, 5),
+      )
+    }
+  }
   const handleRemoveImage = (idx: number) => {
     setImages((prev) => prev.filter((_, i) => i !== idx))
   }
@@ -52,6 +81,25 @@ export default function SubmitSolutionScreen() {
           }}
         />
         <Text style={styles.problemLabel}>Problem of the Day</Text>
+        {loadingQuestion ? (
+          <View style={{ alignItems: "center", marginVertical: 24 }}>
+            <ActivityIndicator size="large" color="#4CAF50" />
+            <Text style={{ fontFamily: "Lexend", marginTop: 8 }}>
+              Loading question...
+            </Text>
+          </View>
+        ) : (
+          <Text
+            style={{
+              fontFamily: "Lexend",
+              fontSize: 16,
+              marginHorizontal: 24,
+              marginBottom: 12,
+            }}
+          >
+            {dailyQuestion?.question || "No question available."}
+          </Text>
+        )}
         <View style={styles.inputRow}>
           <Pressable style={styles.inputBox} onPress={handleTakePhoto}>
             <FontAwesome name="camera" size={32} color="#4CAF50" />
@@ -86,12 +134,39 @@ export default function SubmitSolutionScreen() {
           style={({ pressed }) => [
             styles.submitButton,
             pressed && { opacity: 0.8 },
-            images.length === 0 && { backgroundColor: "#A5D6A7" },
+            (images.length === 0 || submitting || !user || !dailyQuestion) && {
+              backgroundColor: "#A5D6A7",
+            },
           ]}
-          disabled={images.length === 0}
-          onPress={() => router.push("/grading-result")}
+          disabled={
+            images.length === 0 || submitting || !user || !dailyQuestion
+          }
+          onPress={async () => {
+            if (!user || !dailyQuestion) return
+            setSubmitting(true)
+            try {
+              const { gradingResultId } = await submitSolutionForGrading({
+                userId: user.userId,
+                questionId: dailyQuestion.id,
+                question: dailyQuestion.question,
+                imageUris: images,
+              })
+              setSubmitting(false)
+              router.push(`/grading-result?id=${gradingResultId}`)
+            } catch (err: any) {
+              setSubmitting(false)
+              Alert.alert(
+                "Submission Failed",
+                err?.message || "An error occurred. Please try again.",
+              )
+            }
+          }}
         >
-          <Text style={styles.submitButtonText}>Submit for Grading</Text>
+          {submitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>Submit for Grading</Text>
+          )}
         </Pressable>
         <Pressable
           onPress={handleClearImages}

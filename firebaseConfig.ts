@@ -5,6 +5,7 @@ import { initializeApp } from "firebase/app"
 import { initializeAuth } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import { getStorage } from "firebase/storage"
+import { getAI, getGenerativeModel, GoogleAIBackend } from "firebase/ai"
 
 function getEnvVar(value: string | undefined, name: string): string {
   if (!value) {
@@ -52,4 +53,8 @@ export const app = initializeApp(firebaseConfig)
 export const auth = initializeAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
+export const ai = getAI(app, {
+  backend: new GoogleAIBackend(),
+})
+
 

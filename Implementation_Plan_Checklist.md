@@ -208,5 +208,13 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
+## 5. Remote Config for AI Model/Prompt
+
+- [ ] Implement Firebase Remote Config
+  - Allow changing the AI model and grading prompt on the fly without redeploying the app or backend.
+  - Integrate Remote Config fetch and usage in the AI grading logic (Cloud Function and/or client as needed).
+
+---
+
 This checklist ensures a structured and detailed approach to implementing the app, covering both frontend and backend tasks.
 

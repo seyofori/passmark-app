@@ -51,6 +51,13 @@ export default function GradingResultScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "Your Result",
+            headerBackTitle: "Solution",
+            headerBackTitleStyle: { fontFamily: "Lexend" },
+          }}
+        />
         <Text style={[styles.loadingText, styles.centerMessage]}>
           Loading result...
         </Text>
@@ -60,6 +67,13 @@ export default function GradingResultScreen() {
   if (isError) {
     return (
       <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "Your Result",
+            headerBackTitle: "Solution",
+            headerBackTitleStyle: { fontFamily: "Lexend" },
+          }}
+        />
         <Text style={[styles.errorText, styles.centerMessage]}>
           Failed to load result.
         </Text>
@@ -72,6 +86,13 @@ export default function GradingResultScreen() {
   if (!data) {
     return (
       <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "Your Result",
+            headerBackTitle: "Solution",
+            headerBackTitleStyle: { fontFamily: "Lexend" },
+          }}
+        />
         <Text style={[styles.noDataText, styles.centerMessage]}>
           No grading result found.
         </Text>
