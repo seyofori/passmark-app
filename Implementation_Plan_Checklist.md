@@ -25,10 +25,11 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ### Tasks
 
-- [ ] On app start, check AsyncStorage for existing user info.
-- [ ] If not found, generate a new user object (with unique id, etc.) and store in AsyncStorage.
-- [ ] Use this user info for all navigation and data fetching.
-- [ ] Sign in the user anonymously with Firebase Auth on app start (if not already signed in).
+- [x] On app start, check AsyncStorage for existing user info.
+- [x] If not found, generate a new user object (with unique id, etc.) and store in AsyncStorage.
+- [x] Use this user info for all navigation and data fetching.
+- [x] Sign in the user anonymously with Firebase Auth on app start (if not already signed in).
+- [x] Handle corrupted/invalid AsyncStorage user data gracefully (auto-recover).
 - [ ] (Later: migrate user info to Firestore for persistence across devices.)
 
 ---
