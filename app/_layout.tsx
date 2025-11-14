@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Text, View } from "react-native"
 import "react-native-get-random-values"
 import { AppUser, ensureAnonymousSignIn, getOrCreateUser } from "../userSession"
+import { UserProvider } from "./UserContext"
 
 const queryClient = new QueryClient()
 
@@ -118,16 +119,18 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <View style={{ flex: 1 }}>
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: "#F9FAFB" },
-            headerTitleStyle: { fontFamily: "Lexend" },
-          }}
-        />
-      </View>
-    </QueryClientProvider>
+    <UserProvider value={{ user }}>
+      <QueryClientProvider client={queryClient}>
+        <View style={{ flex: 1 }}>
+          <Stack
+            screenOptions={{
+              headerStyle: { backgroundColor: "#F9FAFB" },
+              headerTitleStyle: { fontFamily: "Lexend" },
+            }}
+          />
+        </View>
+      </QueryClientProvider>
+    </UserProvider>
   )
 }
 

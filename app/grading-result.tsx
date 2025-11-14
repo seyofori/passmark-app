@@ -1,6 +1,7 @@
 import { FontAwesome } from "@expo/vector-icons"
 import { useQuery } from "@tanstack/react-query"
 import { Stack, useRouter, useLocalSearchParams } from "expo-router"
+import { useUser } from "./UserContext"
 import React from "react"
 import {
   Pressable,
@@ -30,10 +31,9 @@ function getMotivationalMessage(grade: number) {
 
 export default function GradingResultScreen() {
   const router = useRouter()
-  const { userId, resultId } = useLocalSearchParams() as {
-    userId: string
-    resultId: string
-  }
+  const { resultId } = useLocalSearchParams() as { resultId: string }
+  const { user } = useUser()
+  const userId = user?.userId
   const { data, isLoading, isError, refetch, isFetching } =
     useQuery<GradingResult>({
       queryKey: ["grading-result", userId, resultId],
@@ -41,6 +41,7 @@ export default function GradingResultScreen() {
         const [, uid, rid] = queryKey
         return fetchGradingResultFirebase(uid as string, rid as string)
       },
+      enabled: !!userId && !!resultId,
     })
 
   const onRefresh = () => {

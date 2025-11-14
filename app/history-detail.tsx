@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Stack, useLocalSearchParams } from "expo-router"
+import { useUser } from "./UserContext"
 import React from "react"
 import {
   RefreshControl,
@@ -26,7 +27,9 @@ function getGradeColor(grade: number) {
 }
 
 export default function HistoryDetailScreen() {
-  const { id, userId } = useLocalSearchParams()
+  const { id } = useLocalSearchParams()
+  const { user } = useUser()
+  const userId = user?.userId
 
   const {
     data: q,
@@ -40,7 +43,7 @@ export default function HistoryDetailScreen() {
       const [, uid, qid] = queryKey
       return fetchHistoryDetailFirebase(uid as string, qid as string)
     },
-    enabled: typeof id === "string" && id.length > 0,
+    enabled: !!userId && typeof id === "string" && id.length > 0,
   })
   const scoreColor = q ? getGradeColor(q.grade) : "#AAA"
 

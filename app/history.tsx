@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Stack, useLocalSearchParams, useRouter } from "expo-router"
+import { Stack, useRouter } from "expo-router"
 import React from "react"
 import {
   FlatList,
@@ -13,6 +13,7 @@ import {
   fetchHistory as fetchHistoryFirebase,
   HistoryItem,
 } from "../firebaseApi"
+import { useUser } from "./UserContext"
 
 function getGradeColor(grade: number) {
   if (grade >= 90) return "#43B649"
@@ -22,7 +23,8 @@ function getGradeColor(grade: number) {
 
 export default function HistoryScreen() {
   const router = useRouter()
-  const { userId } = useLocalSearchParams() as { userId: string }
+  const { user } = useUser()
+  const userId = user?.userId
   const {
     data: historyData,
     isLoading,
@@ -35,6 +37,7 @@ export default function HistoryScreen() {
       const [, uid] = queryKey
       return fetchHistoryFirebase(uid as string)
     },
+    enabled: !!userId,
   })
 
   const onRefresh = () => {

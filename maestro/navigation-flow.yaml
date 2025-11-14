@@ -1,0 +1,16 @@
+# Maestro test: Navigation flow and user context
+appId: com.yourcompany.passmark
+---
+- launchApp
+- assertVisible: "Passmark"
+- tapOn: "View History"
+- assertVisible: "History"
+- tapOn: "History Item"
+- assertVisible: "Results & Feedback"
+- back
+- assertVisible: "History"
+- back
+- assertVisible: "Passmark"
+- tapOn: "Submit Solution"
+- assertVisible: "Submit Solution"
+

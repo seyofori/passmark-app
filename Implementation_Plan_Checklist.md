@@ -34,7 +34,33 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
-## 2. Home Screen
+## 1B. Screen Refactors
+
+- [x] Home Screen: TanStack Query, real API
+- [x] History Screen: TanStack Query, real API
+- [x] History Detail Screen: TanStack Query, real API
+- [x] Grading Result Screen: TanStack Query, real API, user context
+
+---
+
+## 2. Navigation & User Context
+
+- [x] Replace userId passing in navigation/routes with a UserContext provider
+  - Provide user object (from AsyncStorage/Firebase) via React context
+  - Refactor all screens/components to consume user from context instead of navigation params
+  - Update navigation logic to remove userId from route params
+  - Ensure all data fetching hooks use user from context
+
+---
+
+## 3. Next Steps
+
+- [ ] Test navigation between screens to ensure user context works
+- [ ] Update deep links, tests, or docs that referenced userId in the route
+
+---
+
+## 3. Home Screen
 
 ### Tasks
 
@@ -53,7 +79,7 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
-## 3. Solution Submission Screen
+## 4. Solution Submission Screen
 
 ### Tasks
 
@@ -71,7 +97,7 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
-## 4. History Screen
+## 5. History Screen
 
 ### Tasks
 
@@ -87,7 +113,7 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
-## 5. Grading Result Screen
+## 6. Grading Result Screen
 
 ### Tasks
 
@@ -105,7 +131,7 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
-## 6. Profile/Settings Screen (Skipped)
+## 7. Profile/Settings Screen (Skipped)
 
 ### Tasks
 
@@ -123,7 +149,7 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
-## 7. Backend Implementation
+## 8. Backend Implementation
 
 ### Tasks
 
@@ -135,20 +161,6 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
   - [ ] AI grading logic.
   - [ ] Streak calculation logic.
   - [ ] Feedback generation.
-
----
-
-## 8. Routing & Params Integration
-
-### Tasks
-
-- [ ] Audit all screens for required navigation params (e.g., userId, questionId, resultId).
-- [ ] Update all navigation calls (router.push, etc.) to include required params.
-- [ ] Update all screen components to read and validate params using `useLocalSearchParams` or equivalent.
-- [ ] Add fallback UI for missing/invalid params.
-- [ ] Update Maestro and E2E tests to include navigation with params.
-- [ ] Document navigation patterns and required params in the README.
-- [ ] Test all navigation flows manually and via Maestro.
 
 ---
 
