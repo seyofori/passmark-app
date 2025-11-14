@@ -1,7 +1,16 @@
 import { FontAwesome } from "@expo/vector-icons"
+import { useQuery } from "@tanstack/react-query"
 import { Stack, useRouter } from "expo-router"
 import React from "react"
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native"
+import { fetchGradingResult } from "../mockApi"
 
 function getGradeColor(grade: number) {
   if (grade >= 90) return "#43B649"
@@ -18,10 +27,42 @@ function getMotivationalMessage(grade: number) {
 
 export default function GradingResultScreen() {
   const router = useRouter()
-  // Replace with actual score from grading logic
-  const score = 85
-  const scoreColor = getGradeColor(score)
-  const motivation = getMotivationalMessage(score)
+  const { data, isLoading, isError, refetch, isFetching } = useQuery({
+    queryKey: ["grading-result"],
+    queryFn: fetchGradingResult,
+  })
+
+  const onRefresh = () => {
+    refetch()
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.loadingText, styles.centerMessage]}>Loading result...</Text>
+      </View>
+    )
+  }
+  if (isError) {
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.errorText, styles.centerMessage]}>Failed to load result.</Text>
+        <Pressable onPress={onRefresh} style={styles.retryButton}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </Pressable>
+      </View>
+    )
+  }
+  if (!data) {
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.noDataText, styles.centerMessage]}>No grading result found.</Text>
+      </View>
+    )
+  }
+
+  const scoreColor = getGradeColor(data.score)
+  const motivation = getMotivationalMessage(data.score)
 
   return (
     <View style={styles.container}>
@@ -32,22 +73,29 @@ export default function GradingResultScreen() {
           headerBackTitleStyle: { fontFamily: "Lexend" },
         }}
       />
-      <View style={styles.scoreContainer}>
-        <Text style={[styles.scoreText, { color: scoreColor }]}>
-          {score}/100
-        </Text>
-        <Text style={[styles.motivation, { color: scoreColor }]}>
-          {motivation}
-        </Text>
-      </View>
-      <View style={styles.analysisCard}>
-        <Text style={styles.analysisTitle}>AI Analysis & Tips</Text>
-        <Text style={styles.analysisText}>
-          You excelled in Algebra but should review Geometry concepts like
-          calculating the area of irregular shapes. Practice more problems
-          involving theorems.
-        </Text>
-      </View>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 120 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={onRefresh}
+            tintColor="#4CAF50"
+          />
+        }
+      >
+        <View style={styles.scoreContainer}>
+          <Text style={[styles.scoreText, { color: scoreColor }]}>
+            {data.score}/100
+          </Text>
+          <Text style={[styles.motivation, { color: scoreColor }]}>
+            {motivation}
+          </Text>
+        </View>
+        <View style={styles.analysisCard}>
+          <Text style={styles.analysisTitle}>AI Analysis & Tips</Text>
+          <Text style={styles.analysisText}>{data.analysis}</Text>
+        </View>
+      </ScrollView>
       <View style={styles.bottomButtonWrapper}>
         <Pressable
           style={({ pressed }) => [
@@ -75,6 +123,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
     paddingHorizontal: 0,
     paddingBottom: 0,
+  },
+  centerMessage: {
+    marginTop: 60,
+    textAlign: "center",
+  },
+  errorText: {
+    fontFamily: "Lexend",
+    color: "#F44336",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  loadingText: {
+    fontFamily: "Lexend",
+    color: "#4CAF50",
+    textAlign: "center",
+  },
+  noDataText: {
+    fontFamily: "Lexend",
+    color: "#F44336",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    alignSelf: "center",
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontFamily: "Lexend",
+    fontWeight: "bold",
   },
   scoreContainer: {
     alignItems: "center",

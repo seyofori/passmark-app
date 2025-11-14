@@ -69,27 +69,16 @@ This document outlines the step-by-step plan to integrate TanStack Query (React 
 ## 5. Grading Result Screen (Next Step)
 
 1. **Replace Hardcoded Data**
-   - If any data is fetched (e.g., problem info), use a mock API and `useQuery`.
+   - Create a mock API function to fetch grading results. **(done in mockApi.ts)**
+   - [x] Use `useQuery` to fetch the result.
 2. **Loading State**
-   - [ ] Show a loading spinner or skeleton while fetching.
+   - [x] Show a loading spinner or skeleton for the result.
 3. **Error State**
-   - [ ] Display an error message and a retry button if fetching fails.
+   - [x] Display an error message and a retry button if fetching fails.
 4. **Pull to Refresh**
-   - [ ] If relevant, add pull-to-refresh to reload the problem info.
+   - [x] Add pull-to-refresh to the `ScrollView` to re-fetch the grading result.
 
 ---
-
-## 6. Grading Result Screen
-
-1. **Replace Hardcoded Data**
-   - Create a mock API function to fetch grading results. **(done in mockApi.ts)**
-   - [ ] Use `useQuery` to fetch the result.
-2. **Loading State**
-   - [ ] Show a loading spinner or skeleton for the result.
-3. **Error State**
-   - [ ] Display an error message and a retry button if fetching fails.
-4. **Pull to Refresh**
-   - [ ] Add pull-to-refresh to the `ScrollView` to re-fetch the grading result.
 
 ---
 
