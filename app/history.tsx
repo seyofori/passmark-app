@@ -1,37 +1,15 @@
+import { useQuery } from "@tanstack/react-query"
 import { Stack, useRouter } from "expo-router"
 import React from "react"
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native"
-
-const historyData = [
-  {
-    id: "1",
-
-    title: "Integral of x^2",
-    date: "Oct 26, 2023",
-    grade: 92,
-  },
-  {
-    id: "2",
-
-    title: "Find the derivative o...",
-    date: "Oct 25, 2023",
-    grade: 75,
-  },
-  {
-    id: "3",
-
-    title: "Solve for x in 2x + 5 ...",
-    date: "Oct 24, 2023",
-    grade: 45,
-  },
-  {
-    id: "4",
-
-    title: "Calculate the area ...",
-    date: "Oct 23, 2023",
-    grade: 100,
-  },
-]
+import {
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native"
+import { fetchHistory } from "../mockApi"
 
 function getGradeColor(grade: number) {
   if (grade >= 90) return "#43B649"
@@ -41,6 +19,23 @@ function getGradeColor(grade: number) {
 
 export default function HistoryScreen() {
   const router = useRouter()
+  // Removed redundant refreshing state
+
+  const {
+    data: historyData,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["history"],
+    queryFn: fetchHistory,
+  })
+
+  const onRefresh = () => {
+    refetch()
+  }
+
   return (
     <View style={styles.container}>
       <Stack.Screen
@@ -50,44 +45,92 @@ export default function HistoryScreen() {
           headerBackTitleStyle: { fontFamily: "Lexend" },
         }}
       />
-      <FlatList
-        data={historyData}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.row}
-            onPress={() =>
-              router.push({
-                pathname: "/history-detail",
-                params: { id: item.id },
-              })
-            }
+      {isLoading && (
+        <View style={{ alignItems: "center", marginTop: 40 }}>
+          <Text style={{ fontFamily: "Lexend", color: "#4CAF50" }}>
+            Loading history...
+          </Text>
+        </View>
+      )}
+      {isError && (
+        <View style={{ alignItems: "center", marginTop: 40 }}>
+          <Text
+            style={{
+              fontFamily: "Lexend",
+              color: "#F44336",
+              marginBottom: 8,
+            }}
           >
-            <View
+            Failed to load history.
+          </Text>
+          <Pressable
+            onPress={() => refetch()}
+            style={{
+              backgroundColor: "#4CAF50",
+              borderRadius: 8,
+              paddingVertical: 8,
+              paddingHorizontal: 20,
+            }}
+          >
+            <Text
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 12,
-                marginRight: 16,
-                backgroundColor: "#F1F1F1",
+                color: "#fff",
+                fontFamily: "Lexend",
+                fontWeight: "bold",
               }}
-            />
-            <View style={styles.infoContainer}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.date}>{item.date}</Text>
-            </View>
-            <View
-              style={[
-                styles.gradeBadge,
-                { backgroundColor: getGradeColor(item.grade) },
-              ]}
             >
-              <Text style={styles.gradeText}>{item.grade}/100</Text>
-            </View>
+              Retry
+            </Text>
           </Pressable>
-        )}
-        contentContainerStyle={{ paddingBottom: 32 }}
-      />
+        </View>
+      )}
+      {!isLoading && !isError && historyData && (
+        <FlatList
+          data={historyData}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Pressable
+              style={styles.row}
+              onPress={() =>
+                router.push({
+                  pathname: "/history-detail",
+                  params: { id: item.id },
+                })
+              }
+            >
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 12,
+                  marginRight: 16,
+                  backgroundColor: "#F1F1F1",
+                }}
+              />
+              <View style={styles.infoContainer}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.date}>{item.date}</Text>
+              </View>
+              <View
+                style={[
+                  styles.gradeBadge,
+                  { backgroundColor: getGradeColor(item.grade) },
+                ]}
+              >
+                <Text style={styles.gradeText}>{item.grade}/100</Text>
+              </View>
+            </Pressable>
+          )}
+          contentContainerStyle={{ paddingBottom: 32 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isFetching}
+              onRefresh={onRefresh}
+              tintColor="#4CAF50"
+            />
+          }
+        />
+      )}
     </View>
   )
 }

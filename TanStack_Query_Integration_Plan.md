@@ -19,33 +19,37 @@ This document outlines the step-by-step plan to integrate TanStack Query (React 
 
 1. **Replace Hardcoded Data**
    - Create a mock API function to fetch the daily question and streak. **(done in mockApi.ts)**
-   - [ ] Use `useQuery` to fetch this data.
+   - [x] Use `useQuery` to fetch this data.
 2. **Loading State**
-   - [ ] Show a loading spinner or skeleton while fetching.
+   - [x] Show a loading spinner or skeleton while fetching.
 3. **Error State**
-   - [ ] Display an error message and a retry button if fetching fails.
+   - [x] Display an error message and a retry button if fetching fails.
 4. **Pull to Refresh**
-   - [ ] Add pull-to-refresh using a `RefreshControl` on the main `ScrollView` or `FlatList`.
-   - [ ] Use `refetch` from `useQuery` to refresh data.
+   - [x] Add pull-to-refresh using a `RefreshControl` on the main `ScrollView` or `FlatList`.
+   - [x] Use `refetch` from `useQuery` to refresh data.
 
 ---
 
-## 3. History Screen
+---
+
+## 3. History Screen (Next Step)
 
 1. **Replace Hardcoded Data**
    - Create a mock API function to fetch the user’s history. **(done in mockApi.ts)**
-   - [ ] Use `useQuery` to fetch history data.
+   - [x] Use `useQuery` to fetch history data.
 2. **Loading State**
-   - [ ] Show a loading spinner or skeleton for the list.
+   - [x] Show a loading spinner or skeleton for the list.
 3. **Error State**
-   - [ ] Display an error message and a retry button if fetching fails.
+   - [x] Display an error message and a retry button if fetching fails.
 4. **Pull to Refresh**
-   - [ ] Add pull-to-refresh to the `FlatList` using `RefreshControl`.
-   - [ ] Use `refetch` from `useQuery` to refresh history.
+   - [x] Add pull-to-refresh to the `FlatList` using `RefreshControl`.
+   - [x] Use `refetch` from `useQuery` to refresh history.
 
 ---
 
-## 4. History Detail Screen
+---
+
+## 4. History Detail Screen (Next Step)
 
 1. **Replace Hardcoded Data**
    - Create a mock API function to fetch details for a specific question by ID. **(done in mockApi.ts)**
