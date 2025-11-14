@@ -31,17 +31,19 @@ function getMotivationalMessage(grade: number) {
 
 export default function GradingResultScreen() {
   const router = useRouter()
-  const { resultId } = useLocalSearchParams() as { resultId: string }
+  // Accept both ?id= and ?resultId= for compatibility
+  const params = useLocalSearchParams() as { id?: string; resultId?: string }
+  const gradingResultId = params.id ?? params.resultId
   const { user } = useUser()
   const userId = user?.userId
   const { data, isLoading, isError, refetch, isFetching } =
     useQuery<GradingResult>({
-      queryKey: ["grading-result", userId, resultId],
+      queryKey: ["grading-result", userId, gradingResultId],
       queryFn: ({ queryKey }) => {
         const [, uid, rid] = queryKey
         return fetchGradingResultFirebase(uid as string, rid as string)
       },
-      enabled: !!userId && !!resultId,
+      enabled: !!userId && !!gradingResultId,
     })
 
   const onRefresh = () => {
@@ -131,8 +133,23 @@ export default function GradingResultScreen() {
           </Text>
         </View>
         <View style={styles.analysisCard}>
-          <Text style={styles.analysisTitle}>AI Analysis & Tips</Text>
-          <Text style={styles.analysisText}>{data.analysis}</Text>
+          <Text style={styles.analysisTitle}>AI Feedback</Text>
+          {Array.isArray(data.feedback) && data.feedback.length > 0 ? (
+            data.feedback.map((item) => {
+              const key = `${item.title}-${item.type}-${item.text}`
+              let color = "#FFA500"
+              if (item.type === "success") color = "#43B649"
+              else if (item.type === "error") color = "#F44336"
+              return (
+                <View key={key} style={styles.feedbackItem}>
+                  <Text style={[styles.feedbackTitle, { color }]}>{item.title}</Text>
+                  <Text style={styles.feedbackText}>{item.text}</Text>
+                </View>
+              )
+            })
+          ) : (
+            <Text style={styles.analysisText}>No feedback available.</Text>
+          )}
         </View>
       </ScrollView>
       <View style={styles.bottomButtonWrapper}>
@@ -235,6 +252,20 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend",
     fontSize: 16,
     color: "#608562",
+  },
+  feedbackItem: {
+    marginBottom: 16,
+  },
+  feedbackTitle: {
+    fontFamily: "Lexend",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  feedbackText: {
+    fontFamily: "Lexend",
+    color: "#222",
+    fontSize: 15,
+    marginTop: 2,
   },
   bottomButtonWrapper: {
     position: "absolute",
