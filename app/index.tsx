@@ -1,16 +1,33 @@
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons"
+import { useQuery } from "@tanstack/react-query"
 import { Stack, useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native"
+import { fetchDailyQuestion } from "../mockApi"
 
 export default function HomeScreen() {
+  const router = useRouter()
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Query for daily question and streak
+  const { data, isLoading, isError, refetch, isFetching } = useQuery({
+    queryKey: ["daily-question"],
+    queryFn: fetchDailyQuestion,
+  })
+
+  // Timer logic (unchanged)
   const [timeLeft, setTimeLeft] = useState({
     hours: "00",
     minutes: "00",
     seconds: "00",
   })
-  const router = useRouter()
-
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
@@ -30,13 +47,18 @@ export default function HomeScreen() {
         seconds: seconds.toString().padStart(2, "0"),
       }
     }
-
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft())
     }, 1000)
-
     return () => clearInterval(timer)
   }, [])
+
+  // Pull to refresh handler
+  const onRefresh = async () => {
+    setRefreshing(true)
+    await refetch()
+    setRefreshing(false)
+  }
 
   return (
     <View style={[styles.container, { paddingTop: 100 }]}>
@@ -65,39 +87,102 @@ export default function HomeScreen() {
           }}
         >
           <FontAwesome6 name="fire" size={18} color="#FF5722" />
-          <Text style={[styles.streak, { marginLeft: 6 }]}>5 day streak</Text>
+          <Text style={[styles.streak, { marginLeft: 6 }]}>
+            {data ? `${data.streak} day streak` : "--"}
+          </Text>
         </View>
       </View>
-      <ScrollView style={{ marginTop: 30 }}>
-        {/* Daily Question Card */}
-        <View style={styles.questionCard}>
-          <Text style={styles.questionTitle}>Problem of the Day</Text>
-          <Text style={styles.questionText}>
-            If a rectangle has a perimeter of 36 units and its length is twice
-            its width, what is the area of the rectangle in square units?
-          </Text>
-          {/* Countdown Timer */}
-          <View style={styles.timerContainer}>
-            <View style={{ alignItems: "center" }}>
-              <View style={styles.timerBox}>
-                <Text style={styles.timerText}>{timeLeft.hours}</Text>
+      <ScrollView
+        style={{ marginTop: 30 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing || isFetching}
+            onRefresh={onRefresh}
+            tintColor="#4CAF50"
+          />
+        }
+      >
+        {/* Loading State */}
+        {isLoading && (
+          <View style={{ alignItems: "center", marginTop: 40 }}>
+            <FontAwesome
+              name="spinner"
+              size={32}
+              color="#4CAF50"
+              style={{ marginBottom: 12 }}
+            />
+            <Text style={{ fontFamily: "Lexend", color: "#4CAF50" }}>
+              Loading today&#39;s problem...
+            </Text>
+          </View>
+        )}
+        {/* Error State */}
+        {isError && (
+          <View style={{ alignItems: "center", marginTop: 40 }}>
+            <FontAwesome
+              name="exclamation-triangle"
+              size={32}
+              color="#F44336"
+              style={{ marginBottom: 12 }}
+            />
+            <Text
+              style={{
+                fontFamily: "Lexend",
+                color: "#F44336",
+                marginBottom: 8,
+              }}
+            >
+              Failed to load today&#39;s problem.
+            </Text>
+            <Pressable
+              onPress={() => refetch()}
+              style={{
+                backgroundColor: "#4CAF50",
+                borderRadius: 8,
+                paddingVertical: 8,
+                paddingHorizontal: 20,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  fontFamily: "Lexend",
+                  fontWeight: "bold",
+                }}
+              >
+                Retry
+              </Text>
+            </Pressable>
+          </View>
+        )}
+        {/* Main Content */}
+        {!isLoading && !isError && data && (
+          <View style={styles.questionCard}>
+            <Text style={styles.questionTitle}>Problem of the Day</Text>
+            <Text style={styles.questionText}>{data.question}</Text>
+            {/* Countdown Timer */}
+            <View style={styles.timerContainer}>
+              <View style={{ alignItems: "center" }}>
+                <View style={styles.timerBox}>
+                  <Text style={styles.timerText}>{timeLeft.hours}</Text>
+                </View>
+                <Text style={styles.timerLabel}>Hours</Text>
               </View>
-              <Text style={styles.timerLabel}>Hours</Text>
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <View style={styles.timerBox}>
-                <Text style={styles.timerText}>{timeLeft.minutes}</Text>
+              <View style={{ alignItems: "center" }}>
+                <View style={styles.timerBox}>
+                  <Text style={styles.timerText}>{timeLeft.minutes}</Text>
+                </View>
+                <Text style={styles.timerLabel}>Minutes</Text>
               </View>
-              <Text style={styles.timerLabel}>Minutes</Text>
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <View style={styles.timerBox}>
-                <Text style={styles.timerText}>{timeLeft.seconds}</Text>
+              <View style={{ alignItems: "center" }}>
+                <View style={styles.timerBox}>
+                  <Text style={styles.timerText}>{timeLeft.seconds}</Text>
+                </View>
+                <Text style={styles.timerLabel}>Seconds</Text>
               </View>
-              <Text style={styles.timerLabel}>Seconds</Text>
             </View>
           </View>
-        </View>
+        )}
       </ScrollView>
 
       {/* Navigation Buttons */}
