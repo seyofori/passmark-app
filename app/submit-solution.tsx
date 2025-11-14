@@ -1,5 +1,5 @@
 import { FontAwesome } from "@expo/vector-icons"
-import { Stack } from "expo-router"
+import { Stack, useRouter } from "expo-router"
 import React, { useState } from "react"
 import {
   Image,
@@ -12,6 +12,7 @@ import {
 
 export default function SubmitSolutionScreen() {
   const [images, setImages] = useState([1, 2, 3])
+  const router = useRouter()
 
   // Placeholder for image picking logic
   const handleTakePhoto = () => {}
@@ -67,6 +68,7 @@ export default function SubmitSolutionScreen() {
             styles.submitButton,
             pressed && { opacity: 0.8 },
           ]}
+          onPress={() => router.push("/grading-result")}
         >
           <Text style={styles.submitButtonText}>Submit for Grading</Text>
         </Pressable>
