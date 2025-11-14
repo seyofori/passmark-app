@@ -1,4 +1,5 @@
 import { FontAwesome } from "@expo/vector-icons"
+import * as ImagePicker from "expo-image-picker"
 import { Stack, useRouter } from "expo-router"
 import React, { useState } from "react"
 import {
@@ -16,7 +17,24 @@ export default function SubmitSolutionScreen() {
   const router = useRouter()
 
   // Placeholder for image picking logic
-  const handleTakePhoto = () => {}
+  const handleTakePhoto = async () => {
+    if (images.length >= 5) return
+    const { status } = await ImagePicker.requestCameraPermissionsAsync()
+    if (status !== "granted") {
+      alert("Camera permission is required to take photos.")
+      return
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 0.8,
+    })
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImages((prev) =>
+        prev.length < 5 ? [...prev, result.assets[0].uri].slice(0, 5) : prev,
+      )
+    }
+  }
   const handleUploadFromGallery = () => {}
   const handleRemoveImage = (idx: number) => {
     setImages((prev) => prev.filter((_, i) => i !== idx))
