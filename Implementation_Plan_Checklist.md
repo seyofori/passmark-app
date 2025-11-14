@@ -9,14 +9,27 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 ### Tasks
 
 - [x] Initialize the React Native project using Expo.
-- [ ] Set up Firebase backend services:
-  - [ ] Firestore for data storage.
-  - [ ] Firebase Authentication for user accounts.
-  - [ ] Firebase Storage for solution images.
+- [x] Set up Firebase backend services:
+  - [x] Firestore for data storage.
+  - [x] Firebase Authentication for user accounts.
+  - [x] Firebase Storage for solution images.
   - [ ] Firebase AI Logic integration grading and streak calculations.
-- [ ] Install required dependencies:
-  - [ ] Firebase SDK.
-  - [ ] Expo Camera and Image Picker.
+- [x] Install required dependencies:
+  - [x] Firebase SDK.
+  - [x] Expo Camera and Image Picker.
+  - [x] TanStack Query for data fetching/caching.
+
+---
+
+## 1A. User Initialization & Auth
+
+### Tasks
+
+- [ ] On app start, check AsyncStorage for existing user info.
+- [ ] If not found, generate a new user object (with unique id, etc.) and store in AsyncStorage.
+- [ ] Use this user info for all navigation and data fetching.
+- [ ] Sign in the user anonymously with Firebase Auth on app start (if not already signed in).
+- [ ] (Later: migrate user info to Firestore for persistence across devices.)
 
 ---
 
@@ -24,18 +37,18 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ### Tasks
 
-- [ ] Design the header:
-  - [ ] Add the app title " ✅ Passmark".
-  - [ ] Display the streak badge (e.g., "🔥 5-day streak").
-- [ ] Implement the daily question card:
-  - [ ] Fetch the question from Firestore.
-  - [ ] Style the question text/image.
-- [ ] Add the countdown timer:
-  - [ ] Calculate remaining time based on the question’s date.
-  - [ ] Style the timer with hours, minutes, and seconds.
-- [ ] Add navigation buttons:
-  - [ ] "Submit Solution" button.
-  - [ ] "View History" button.
+- [x] Design the header:
+  - [x] Add the app title " ✅ Passmark".
+  - [x] Display the streak badge (e.g., "🔥 5-day streak").
+- [x] Implement the daily question card:
+  - [x] Fetch the question from Firestore (via TanStack Query).
+  - [x] Style the question text/image.
+- [x] Add the countdown timer:
+  - [x] Calculate remaining time based on the question’s date.
+  - [x] Style the timer with hours, minutes, and seconds.
+- [x] Add navigation buttons:
+  - [x] "Submit Solution" button.
+  - [x] "View History" button.
 
 ---
 
@@ -61,15 +74,15 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ### Tasks
 
-- [ ] Design the header:
-  - [ ] Add the title "Your History".
-- [ ] Implement the list view:
-  - [ ] Fetch solved questions and grades from Firestore.
-  - [ ] Style rows with alternating colors.
-  - [ ] Add thumbnails, grade badges, and dates.
-- [ ] Add tappable rows:
-  - [ ] Open detailed view for each question.
-  - [ ] Display full question text/image, solution images, and feedback.
+- [x] Design the header:
+  - [x] Add the title "Your History".
+- [x] Implement the list view:
+  - [x] Fetch solved questions and grades from Firestore (via TanStack Query).
+  - [x] Style rows with alternating colors.
+  - [x] Add thumbnails, grade badges, and dates.
+- [x] Add tappable rows:
+  - [x] Open detailed view for each question.
+  - [x] Display full question text/image, solution images, and feedback.
 
 ---
 
@@ -77,21 +90,21 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ### Tasks
 
-- [ ] Design the header:
-  - [ ] Add the title "Your Result".
-- [ ] Implement grade display:
-  - [ ] Style the grade prominently (e.g., "85/100").
-  - [ ] Add motivational text (e.g., "Great Job!").
-- [ ] Add feedback section:
-  - [ ] Fetch AI-generated feedback from Firebase Functions.
-  - [ ] Style the feedback as a card.
-- [ ] Add retry button:
-  - [ ] Style the button with a refresh icon.
-  - [ ] Connect the button to allow resubmission.
+- [x] Design the header:
+  - [x] Add the title "Your Result".
+- [x] Implement grade display:
+  - [x] Style the grade prominently (e.g., "85/100").
+  - [x] Add motivational text (e.g., "Great Job!").
+- [x] Add feedback section:
+  - [x] Fetch AI-generated feedback from Firebase Functions.
+  - [x] Style the feedback as a card.
+- [x] Add retry button:
+  - [x] Style the button with a refresh icon.
+  - [x] Connect the button to allow resubmission.
 
 ---
 
-## 6. Profile/Settings Screen
+## 6. Profile/Settings Screen (Skipped)
 
 ### Tasks
 
@@ -113,10 +126,10 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ### Tasks
 
-- [ ] Set up Firestore collections:
-  - [ ] `Users` collection with fields: `userId`, `streak`, `history`, `profilePicture`.
-  - [ ] `Questions` collection with fields: `questionId`, `content`, `date`, `difficulty`.
-  - [ ] `Submissions` collection with fields: `submissionId`, `userId`, `questionId`, `images`, `grade`, `feedback`, `timestamp`.
+- [x] Set up Firestore collections:
+  - [x] `Users` collection with fields: `userId`, `streak`, `history`, `profilePicture`.
+  - [x] `Questions` collection with fields: `questionId`, `content`, `date`, `difficulty`.
+  - [x] `Submissions` collection with fields: `submissionId`, `userId`, `questionId`, `images`, `grade`, `feedback`, `timestamp`.
 - [ ] Implement Firebase AI Logic integration:
   - [ ] AI grading logic.
   - [ ] Streak calculation logic.
@@ -124,7 +137,21 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 
 ---
 
-## 8. Testing and Deployment
+## 8. Routing & Params Integration
+
+### Tasks
+
+- [ ] Audit all screens for required navigation params (e.g., userId, questionId, resultId).
+- [ ] Update all navigation calls (router.push, etc.) to include required params.
+- [ ] Update all screen components to read and validate params using `useLocalSearchParams` or equivalent.
+- [ ] Add fallback UI for missing/invalid params.
+- [ ] Update Maestro and E2E tests to include navigation with params.
+- [ ] Document navigation patterns and required params in the README.
+- [ ] Test all navigation flows manually and via Maestro.
+
+---
+
+## 9. Testing and Deployment
 
 ### Tasks
 
@@ -156,3 +183,4 @@ This checklist provides a detailed step-by-step plan for implementing the Daily 
 ---
 
 This checklist ensures a structured and detailed approach to implementing the app, covering both frontend and backend tasks.
+

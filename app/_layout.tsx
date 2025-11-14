@@ -15,7 +15,6 @@ export default function RootLayout() {
   useEffect(() => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
-        shouldShowAlert: true,
         shouldPlaySound: true,
         shouldSetBadge: true,
         shouldShowBanner: true,
@@ -35,7 +34,16 @@ export default function RootLayout() {
       const scheduled = await Notifications.getAllScheduledNotificationsAsync()
       const alreadyScheduled = scheduled.some((n) => {
         const t = n.trigger as Notifications.CalendarTriggerInput
-        return t && t.hour === 7 && t.minute === 0 && t.repeats === true
+        console.log("scheduled -> ", t)
+        return (
+          t &&
+          t.type === "calendar" &&
+          //@ts-ignore
+          t.dateComponents.hour === 7 &&
+          //@ts-ignore
+          t.dateComponents.minute === 0 &&
+          t.repeats === true
+        )
       })
       if (!alreadyScheduled) {
         try {
@@ -102,4 +110,5 @@ export default function RootLayout() {
     </QueryClientProvider>
   )
 }
+
 

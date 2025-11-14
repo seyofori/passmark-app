@@ -48,3 +48,13 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+---
+
+### Testing
+
+- Update Maestro and E2E tests to include navigation with params.
+- Manually test all navigation flows to ensure params are passed and handled correctly.
+
+See the MVP Plan for a step-by-step implementation plan.
+

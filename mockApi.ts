@@ -68,9 +68,11 @@ export async function fetchHistoryDetail(id: string) {
 export async function fetchGradingResult() {
   await new Promise((res) => setTimeout(res, 800))
   return {
+    id: "mockResult1",
     score: 85,
     message: "Great Job!",
     analysis:
       "You excelled in Algebra but should review Geometry concepts like calculating the area of irregular shapes. Practice more problems involving theorems.",
   }
 }
+

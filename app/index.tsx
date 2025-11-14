@@ -10,16 +10,15 @@ import {
   Text,
   View,
 } from "react-native"
-import { fetchDailyQuestion } from "../mockApi"
+import { fetchDailyQuestion as fetchDailyQuestionFirebase } from "../firebaseApi"
 
 export default function HomeScreen() {
   const router = useRouter()
   const [refreshing, setRefreshing] = useState(false)
 
-  // Query for daily question and streak
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["daily-question"],
-    queryFn: fetchDailyQuestion,
+    queryFn: fetchDailyQuestionFirebase,
   })
 
   // Timer logic (unchanged)

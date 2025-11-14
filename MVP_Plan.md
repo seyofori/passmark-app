@@ -185,6 +185,40 @@ To create a simple app that helps students prepare for their upcoming math exams
 
 ---
 
+## Routing & Params Integration Plan
+
+After integrating TanStack Query, several pages now require parameters (such as `userId`, `resultId`, or `questionId`) to be passed during navigation. To ensure smooth navigation and correct data fetching, we need to update the routing and navigation logic across the app.
+
+### Steps
+
+1. **Audit All Screens for Required Params**
+
+   - List all screens that require navigation parameters (e.g., History Detail, Grading Result).
+   - Document which params are required for each screen.
+
+2. **Update Navigation Calls**
+
+   - Refactor all `router.push`, `router.replace`, and similar navigation calls to include the required params in the route or as query parameters.
+   - Ensure params are passed in a consistent format (e.g., `/history-detail?questionId=123`).
+
+3. **Update Screen Components to Read Params**
+
+   - Use `useLocalSearchParams` or equivalent to read params in each screen.
+   - Add validation and fallback UI for missing or invalid params.
+
+4. **Update Maestro and Other E2E Tests**
+
+   - Refactor test flows to include navigation with params where required.
+
+5. **Update Documentation**
+
+   - Document the expected navigation patterns and required params for each screen in the project README or a dedicated routing guide.
+
+6. **Test All Navigation Flows**
+   - Manually and/or via Maestro, test all navigation flows to ensure params are passed and handled correctly.
+
+---
+
 ## Conclusion
 
 This MVP focuses on simplicity and core functionality to help students prepare for their math exams effectively. Future iterations can expand on features and improve the AI grading system.

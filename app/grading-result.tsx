@@ -1,6 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons"
 import { useQuery } from "@tanstack/react-query"
-import { Stack, useRouter } from "expo-router"
+import { Stack, useRouter, useLocalSearchParams } from "expo-router"
 import React from "react"
 import {
   Pressable,
@@ -10,7 +10,10 @@ import {
   Text,
   View,
 } from "react-native"
-import { fetchGradingResult } from "../mockApi"
+import {
+  fetchGradingResult as fetchGradingResultFirebase,
+  GradingResult,
+} from "../firebaseApi"
 
 function getGradeColor(grade: number) {
   if (grade >= 90) return "#43B649"
@@ -27,10 +30,18 @@ function getMotivationalMessage(grade: number) {
 
 export default function GradingResultScreen() {
   const router = useRouter()
-  const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: ["grading-result"],
-    queryFn: fetchGradingResult,
-  })
+  const { userId, resultId } = useLocalSearchParams() as {
+    userId: string
+    resultId: string
+  }
+  const { data, isLoading, isError, refetch, isFetching } =
+    useQuery<GradingResult>({
+      queryKey: ["grading-result", userId, resultId],
+      queryFn: ({ queryKey }) => {
+        const [, uid, rid] = queryKey
+        return fetchGradingResultFirebase(uid as string, rid as string)
+      },
+    })
 
   const onRefresh = () => {
     refetch()

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Stack, useRouter } from "expo-router"
+import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import React from "react"
 import {
   FlatList,
@@ -9,7 +9,10 @@ import {
   Text,
   View,
 } from "react-native"
-import { fetchHistory } from "../mockApi"
+import {
+  fetchHistory as fetchHistoryFirebase,
+  HistoryItem,
+} from "../firebaseApi"
 
 function getGradeColor(grade: number) {
   if (grade >= 90) return "#43B649"
@@ -19,17 +22,19 @@ function getGradeColor(grade: number) {
 
 export default function HistoryScreen() {
   const router = useRouter()
-  // Removed redundant refreshing state
-
+  const { userId } = useLocalSearchParams() as { userId: string }
   const {
     data: historyData,
     isLoading,
     isError,
     refetch,
     isFetching,
-  } = useQuery({
-    queryKey: ["history"],
-    queryFn: fetchHistory,
+  } = useQuery<HistoryItem[]>({
+    queryKey: ["history", userId],
+    queryFn: ({ queryKey }) => {
+      const [, uid] = queryKey
+      return fetchHistoryFirebase(uid as string)
+    },
   })
 
   const onRefresh = () => {

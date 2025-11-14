@@ -8,7 +8,10 @@ import {
   Text,
   View,
 } from "react-native"
-import { fetchHistoryDetail } from "../mockApi"
+import {
+  fetchHistoryDetail as fetchHistoryDetailFirebase,
+  HistoryDetail,
+} from "../firebaseApi"
 
 function getFeedbackIcon(type: string) {
   if (type === "success") return "✅"
@@ -23,16 +26,20 @@ function getGradeColor(grade: number) {
 }
 
 export default function HistoryDetailScreen() {
-  const { id } = useLocalSearchParams()
+  const { id, userId } = useLocalSearchParams()
+
   const {
     data: q,
     isLoading,
     isError,
     refetch,
     isFetching,
-  } = useQuery({
-    queryKey: ["history-detail", id],
-    queryFn: () => fetchHistoryDetail(id as string),
+  } = useQuery<HistoryDetail>({
+    queryKey: ["history-detail", userId, id],
+    queryFn: ({ queryKey }) => {
+      const [, uid, qid] = queryKey
+      return fetchHistoryDetailFirebase(uid as string, qid as string)
+    },
     enabled: typeof id === "string" && id.length > 0,
   })
   const scoreColor = q ? getGradeColor(q.grade) : "#AAA"
@@ -184,7 +191,7 @@ export default function HistoryDetailScreen() {
       {/* Solution Images */}
       <Text style={styles.sectionTitle}>Your Solution</Text>
       <View style={styles.solutionImagesRow}>
-        {q.images.map((img, idx) => (
+        {q.images.map((img: string, idx: number) => (
           <View key={idx} style={styles.solutionImageWrapper}>
             <View style={styles.solutionImage} />
             <Text style={styles.solutionPageLabel}>Page {idx + 1}</Text>
@@ -203,7 +210,7 @@ export default function HistoryDetailScreen() {
         </View>
         <Text style={styles.feedbackLabel}>AI Feedback:</Text>
         <View style={{ gap: 20 }}>
-          {q.feedback.map((f, idx) => (
+          {q.feedback.map((f: HistoryDetail["feedback"][number], idx: number) => (
             <View key={idx} style={styles.feedbackRow}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text
