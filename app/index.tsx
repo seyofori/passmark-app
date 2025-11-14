@@ -109,6 +109,7 @@ export default function HomeScreen() {
             styles.submitButtonWrapper,
             pressed && styles.submitButtonPressed,
           ]}
+          onPress={() => router.push("/submit-solution")}
         >
           <Text style={styles.buttonText}>Submit Solution</Text>
         </Pressable>
