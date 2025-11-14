@@ -33,8 +33,12 @@ export default function GradingResultScreen() {
         }}
       />
       <View style={styles.scoreContainer}>
-        <Text style={[styles.scoreText, { color: scoreColor }]}>{score}/100</Text>
-        <Text style={[styles.motivation, { color: scoreColor }]}>{motivation}</Text>
+        <Text style={[styles.scoreText, { color: scoreColor }]}>
+          {score}/100
+        </Text>
+        <Text style={[styles.motivation, { color: scoreColor }]}>
+          {motivation}
+        </Text>
       </View>
       <View style={styles.analysisCard}>
         <Text style={styles.analysisTitle}>AI Analysis & Tips</Text>
