@@ -1,4 +1,4 @@
-import { Stack } from "expo-router"
+import { Stack, useRouter } from "expo-router"
 import React from "react"
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native"
 
@@ -40,6 +40,7 @@ function getGradeColor(grade: number) {
 }
 
 export default function HistoryScreen() {
+  const router = useRouter()
   return (
     <View style={styles.container}>
       <Stack.Screen
@@ -53,7 +54,15 @@ export default function HistoryScreen() {
         data={historyData}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Pressable style={styles.row} onPress={() => {}}>
+          <Pressable
+            style={styles.row}
+            onPress={() =>
+              router.push({
+                pathname: "/history-detail",
+                params: { id: item.id },
+              })
+            }
+          >
             <View
               style={{
                 width: 56,
