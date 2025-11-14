@@ -1,33 +1,8 @@
-import { Stack } from "expo-router"
+import { useQuery } from "@tanstack/react-query"
+import { Stack, useLocalSearchParams } from "expo-router"
 import React from "react"
-import { ScrollView, StyleSheet, Text, View } from "react-native"
-
-// Dummy data for demonstration
-const questionDetails = {
-  id: "1",
-  date: "Oct 26, 2023",
-  question:
-    "Solve the following integral: ∫(3x^2 + 2x - 5) dx. Show all steps of your calculation and provide the final simplified answer.",
-  images: [1, 2],
-  grade: 85,
-  feedback: [
-    {
-      type: "success",
-      title: "Correct Application of Power Rule",
-      text: "You correctly applied the power rule for integration to the 3x² and 2x terms.",
-    },
-    {
-      type: "success",
-      title: "Constant of Integration",
-      text: "Great job remembering to add the constant of integration, '+ C'. This is a crucial step!",
-    },
-    {
-      type: "error",
-      title: "Minor Calculation Error",
-      text: "There seems to be a small error in the integration of the constant term (-5). Remember that the integral of a constant 'k' is 'kx'.",
-    },
-  ],
-}
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native"
+import { fetchHistoryDetail } from "../mockApi"
 
 function getFeedbackIcon(type: string) {
   if (type === "success") return "✅"
@@ -42,13 +17,140 @@ function getGradeColor(grade: number) {
 }
 
 export default function HistoryDetailScreen() {
-  // const { id } = useLocalSearchParams();
-  // Fetch question details by id if using real data
-  const q = questionDetails
-  const scoreColor = getGradeColor(q.grade)
+  const { id } = useLocalSearchParams()
+  const {
+    data: q,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["history-detail", id],
+    queryFn: () => fetchHistoryDetail(id as string),
+    enabled: typeof id === "string" && id.length > 0,
+  })
+  const scoreColor = q ? getGradeColor(q.grade) : "#AAA"
+
+  const onRefresh = () => {
+    refetch()
+  }
+
+  if (isLoading) {
+    return (
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={onRefresh}
+            tintColor="#4CAF50"
+          />
+        }
+        contentContainerStyle={{
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: "Lexend",
+            color: "#4CAF50",
+            marginTop: 40,
+          }}
+        >
+          Loading details...
+        </Text>
+      </ScrollView>
+    )
+  }
+  if (isError) {
+    return (
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={onRefresh}
+            tintColor="#4CAF50"
+          />
+        }
+        contentContainerStyle={{
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: "Lexend",
+            color: "#F44336",
+            marginTop: 40,
+            marginBottom: 8,
+          }}
+        >
+          Failed to load details.
+        </Text>
+        <Text
+          style={{
+            fontFamily: "Lexend",
+            color: "#AAA",
+            marginBottom: 16,
+          }}
+        >
+          Check your connection and try again.
+        </Text>
+        <Text
+          onPress={() => refetch()}
+          style={{
+            color: "#4CAF50",
+            fontFamily: "Lexend",
+            fontWeight: "bold",
+            fontSize: 16,
+            padding: 10,
+            borderRadius: 8,
+            backgroundColor: "#E8F5E9",
+          }}
+        >
+          Retry
+        </Text>
+      </ScrollView>
+    )
+  }
+  if (!q) {
+    return (
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={onRefresh}
+            tintColor="#4CAF50"
+          />
+        }
+        contentContainerStyle={{ alignItems: "center", justifyContent: "center", flex: 1 }}
+      >
+        <Text style={{ fontFamily: "Lexend", color: "#F44336", marginTop: 40, marginBottom: 8 }}>
+          No details found for this question.
+        </Text>
+        <Text style={{ fontFamily: "Lexend", color: "#AAA", marginBottom: 16 }}>
+          The requested data could not be found. It may have been deleted or is unavailable.
+        </Text>
+      </ScrollView>
+    )
+  }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={isFetching}
+          onRefresh={onRefresh}
+          tintColor="#4CAF50"
+        />
+      }
+    >
       <Stack.Screen
         options={{
           title: `Question from ${q.date}`,
