@@ -1,0 +1,18 @@
+# History Screen Maestro Flow
+appId: com.seyofori.passmark
+---
+- launchApp
+- tapOn: "View History"
+- assertVisible: "History"
+- assertVisible: "Integral of x^2"
+- swipe:
+    direction: DOWN
+    element: "History"
+- assertVisible: "Integral of x^2"
+- tapOn: "Integral of x^2"
+- assertVisible: "Question"
+- back
+- assertVisible: "History"
+- back
+- assertVisible: "Passmark"
+

@@ -1,0 +1,17 @@
+# Home Screen Maestro Flow
+appId: com.seyofori.passmark
+---
+- launchApp
+- assertVisible: "Passmark"
+- assertVisible: "Problem of the Day"
+- assertVisible: "Submit Solution"
+- assertVisible: "View History"
+- swipe:
+    direction: DOWN
+    element: "Problem of the Day"
+- assertVisible: "Problem of the Day"
+- tapOn: "View History"
+- assertVisible: "History"
+- back
+- assertVisible: "Passmark"
+

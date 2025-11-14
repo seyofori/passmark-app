@@ -1,0 +1,17 @@
+# Grading Result Screen Maestro Flow
+appId: com.seyofori.passmark
+---
+- launchApp
+- tapOn: "Submit Solution"
+- assertVisible: "Your Result"
+- assertVisible: "/100"
+- assertVisible: "AI Analysis & Tips"
+- swipe:
+    direction: DOWN
+    element: "Your Result"
+- assertVisible: "Your Result"
+- tapOn: "Try Again"
+- assertVisible: "Submit Solution"
+- back
+- assertVisible: "Passmark"
+
