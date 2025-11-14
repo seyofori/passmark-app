@@ -53,18 +53,20 @@ This document outlines the step-by-step plan to integrate TanStack Query (React 
 
 1. **Replace Hardcoded Data**
    - Create a mock API function to fetch details for a specific question by ID. **(done in mockApi.ts)**
-   - [ ] Use `useQuery` with the question ID.
+   - [x] Use `useQuery` with the question ID.
 2. **Loading State**
-   - [ ] Show a loading spinner or skeleton for the detail view.
+   - [x] Show a loading spinner or skeleton for the detail view.
 3. **Error State**
-   - [ ] Display an error message and a retry button if fetching fails.
+   - [x] Display an error message and a retry button if fetching fails.
 4. **Pull to Refresh**
-   - [ ] Add pull-to-refresh to the `ScrollView`.
-   - [ ] Use `refetch` from `useQuery` to refresh the detail.
+   - [x] Add pull-to-refresh to the `ScrollView`.
+   - [x] Use `refetch` from `useQuery` to refresh the detail.
 
 ---
 
-## 5. Submit Solution Screen
+---
+
+## 5. Grading Result Screen (Next Step)
 
 1. **Replace Hardcoded Data**
    - If any data is fetched (e.g., problem info), use a mock API and `useQuery`.

@@ -1,7 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { Stack, useLocalSearchParams } from "expo-router"
 import React from "react"
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native"
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native"
 import { fetchHistoryDetail } from "../mockApi"
 
 function getFeedbackIcon(type: string) {
@@ -128,13 +134,25 @@ export default function HistoryDetailScreen() {
             tintColor="#4CAF50"
           />
         }
-        contentContainerStyle={{ alignItems: "center", justifyContent: "center", flex: 1 }}
+        contentContainerStyle={{
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+        }}
       >
-        <Text style={{ fontFamily: "Lexend", color: "#F44336", marginTop: 40, marginBottom: 8 }}>
+        <Text
+          style={{
+            fontFamily: "Lexend",
+            color: "#F44336",
+            marginTop: 40,
+            marginBottom: 8,
+          }}
+        >
           No details found for this question.
         </Text>
         <Text style={{ fontFamily: "Lexend", color: "#AAA", marginBottom: 16 }}>
-          The requested data could not be found. It may have been deleted or is unavailable.
+          The requested data could not be found. It may have been deleted or is
+          unavailable.
         </Text>
       </ScrollView>
     )
