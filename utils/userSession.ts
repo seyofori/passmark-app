@@ -12,6 +12,7 @@ export interface AppUser {
   userId: string
   createdAt: string
   streak: number
+  lastStreakDate: string
 }
 
 // Update the user's streak in AsyncStorage
@@ -59,6 +60,7 @@ export async function getOrCreateUser(): Promise<AppUser> {
         userId: parsed.userId,
         createdAt: parsed.createdAt,
         streak: typeof parsed.streak === "number" ? parsed.streak : 0,
+        lastStreakDate: parsed.lastStreakDate || "",
       }
     } catch (err) {
       // Corrupted or invalid data, remove and create new user
@@ -70,6 +72,7 @@ export async function getOrCreateUser(): Promise<AppUser> {
     userId: uuidv4(),
     createdAt: new Date().toISOString(),
     streak: 0,
+    lastStreakDate: "",
   }
   await AsyncStorage.setItem(USER_KEY, JSON.stringify(newUser))
   return newUser

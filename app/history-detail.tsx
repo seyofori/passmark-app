@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
+import { format, isThisWeek, isToday, isYesterday } from "date-fns"
 import { Stack, useLocalSearchParams } from "expo-router"
-import { useUser } from "./UserContext"
 import React from "react"
 import {
   RefreshControl,
@@ -10,9 +10,10 @@ import {
   View,
 } from "react-native"
 import {
-  fetchHistoryDetail as fetchHistoryDetailFirebase,
-  HistoryDetail,
+  fetchGradingResult as fetchHistoryDetailFirebase,
+  GradingResult,
 } from "../firebaseApi"
+import { useUser } from "./UserContext"
 
 function getFeedbackIcon(type: string) {
   if (type === "success") return "✅"
@@ -32,12 +33,12 @@ export default function HistoryDetailScreen() {
   const userId = user?.userId
 
   const {
-    data: q,
+    data: historyDetail,
     isLoading,
     isError,
     refetch,
     isFetching,
-  } = useQuery<HistoryDetail>({
+  } = useQuery<GradingResult>({
     queryKey: ["history-detail", userId, id],
     queryFn: ({ queryKey }) => {
       const [, uid, qid] = queryKey
@@ -45,7 +46,7 @@ export default function HistoryDetailScreen() {
     },
     enabled: !!userId && typeof id === "string" && id.length > 0,
   })
-  const scoreColor = q ? getGradeColor(q.grade) : "#AAA"
+  const scoreColor = historyDetail ? getGradeColor(historyDetail.score) : "#AAA"
 
   const onRefresh = () => {
     refetch()
@@ -133,7 +134,7 @@ export default function HistoryDetailScreen() {
       </ScrollView>
     )
   }
-  if (!q) {
+  if (!historyDetail) {
     return (
       <ScrollView
         style={styles.container}
@@ -181,7 +182,14 @@ export default function HistoryDetailScreen() {
     >
       <Stack.Screen
         options={{
-          title: `Question from ${q.date}`,
+          title: `Question from ${(() => {
+            const dateObj = new Date(historyDetail.createdAt)
+            if (isToday(dateObj)) return "Today"
+            if (isYesterday(dateObj)) return "Yesterday"
+            if (isThisWeek(dateObj, { weekStartsOn: 1 }))
+              return format(dateObj, "EEEE")
+            return format(dateObj, "MMM d, yyyy")
+          })()}`,
           headerBackTitle: "History",
           headerBackTitleStyle: { fontFamily: "Lexend" },
         }}
@@ -189,46 +197,38 @@ export default function HistoryDetailScreen() {
       {/* Question Card */}
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Question</Text>
-        <Text style={styles.cardQuestion}>{q.question}</Text>
+        <Text style={styles.cardQuestion}>{historyDetail.question}</Text>
       </View>
-      {/* Solution Images */}
-      <Text style={styles.sectionTitle}>Your Solution</Text>
-      <View style={styles.solutionImagesRow}>
-        {q.images.map((img: string, idx: number) => (
-          <View key={idx} style={styles.solutionImageWrapper}>
-            <View style={styles.solutionImage} />
-            <Text style={styles.solutionPageLabel}>Page {idx + 1}</Text>
-            <Text style={styles.solutionPageHint}>Tap to view full screen</Text>
-          </View>
-        ))}
-      </View>
+
       {/* Results & Feedback */}
       <Text style={styles.sectionTitle}>Results & Feedback</Text>
       <View style={styles.resultCard}>
         <View style={styles.scoreCircleWrapper}>
           <View style={[styles.scoreCircleBg, { borderColor: scoreColor }]}>
-            <Text style={styles.scoreText}>{q.grade}</Text>
+            <Text style={styles.scoreText}>{historyDetail.score}</Text>
             <Text style={styles.scoreOutOf}>/ 100</Text>
           </View>
         </View>
         <Text style={styles.feedbackLabel}>AI Feedback:</Text>
         <View style={{ gap: 20 }}>
-          {q.feedback.map((f: HistoryDetail["feedback"][number], idx: number) => (
-            <View key={idx} style={styles.feedbackRow}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text
-                  style={[
-                    styles.feedbackIcon,
-                    f.type === "success" ? styles.success : styles.error,
-                  ]}
-                >
-                  {getFeedbackIcon(f.type)}
-                </Text>
-                <Text style={styles.feedbackTitle}>{f.title}:</Text>
+          {historyDetail.feedback.map(
+            (f: GradingResult["feedback"][number], idx: number) => (
+              <View key={idx} style={styles.feedbackRow}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text
+                    style={[
+                      styles.feedbackIcon,
+                      f.type === "success" ? styles.success : styles.error,
+                    ]}
+                  >
+                    {getFeedbackIcon(f.type)}
+                  </Text>
+                  <Text style={styles.feedbackTitle}>{f.title}:</Text>
+                </View>
+                <Text style={styles.feedbackText}>{f.text}</Text>
               </View>
-              <Text style={styles.feedbackText}>{f.text}</Text>
-            </View>
-          ))}
+            ),
+          )}
         </View>
       </View>
     </ScrollView>

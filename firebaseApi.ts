@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore"
 import { z } from "zod"
 import { ai, db } from "./firebaseConfig"
+import { getOrCreateUser, updateUserStreak } from "./utils/userSession"
 
 // Submit solution for AI grading
 
@@ -158,6 +159,41 @@ export async function submitSolutionForGrading({
     // 2. AI Grading
     const { score, feedback } = await runAiGrading(imageUris, question)
 
+    if (score > -1) {
+      const user = await getOrCreateUser()
+      const lastStreakDate = user.lastStreakDate
+        ? new Date(user.lastStreakDate)
+        : null
+      const today = new Date()
+      const isSameDay =
+        lastStreakDate &&
+        lastStreakDate.getFullYear() === today.getFullYear() &&
+        lastStreakDate.getMonth() === today.getMonth() &&
+        lastStreakDate.getDate() === today.getDate()
+
+      // Helper to check if last streak date is yesterday
+      function isYesterday(date: Date, today: Date) {
+        const yesterday = new Date(today)
+        yesterday.setDate(today.getDate() - 1)
+        return (
+          date.getFullYear() === yesterday.getFullYear() &&
+          date.getMonth() === yesterday.getMonth() &&
+          date.getDate() === yesterday.getDate()
+        )
+      }
+
+      if (!isSameDay) {
+        let newStreak = 1
+        if (lastStreakDate && isYesterday(lastStreakDate, today)) {
+          newStreak = user.streak + 1
+        }
+        await updateUserStreak(newStreak)
+      } else {
+        // Optionally alert or log that streak was already updated today
+        // alert('Streak already updated today')
+      }
+    }
+
     // 3. Save grading result
     const gradingResultId = await saveGradingResultToFirestore({
       userId,
@@ -198,7 +234,8 @@ export interface GradingResult {
   id: string
   score: number
   feedback: FeedbackItem[]
-  [key: string]: any
+  question: string
+  createdAt: string
 }
 
 // Fetch the daily question (example: from a 'dailyQuestions' collection)
@@ -247,10 +284,12 @@ export async function fetchGradingResult(
   if (!docSnap.exists()) throw new Error("Grading result not found")
   const data = docSnap.data() as DocumentData
   return {
+    ...data,
     id: docSnap.id,
     score: typeof data.score === "number" ? data.score : 0,
     feedback: Array.isArray(data.feedback) ? data.feedback : [],
-    ...data,
+    question: data.question ?? "",
+    createdAt: data.createdAt?.toDate?.()?.toISOString() ?? "",
   }
 }
 

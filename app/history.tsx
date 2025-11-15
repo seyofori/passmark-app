@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { format, isThisWeek, isToday, isYesterday } from "date-fns"
 import { Stack, useRouter } from "expo-router"
-import React, { useEffect } from "react"
+import React from "react"
 import {
   FlatList,
   Pressable,
