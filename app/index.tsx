@@ -10,15 +10,30 @@ import {
   Text,
   View,
 } from "react-native"
-import { fetchDailyQuestion as fetchDailyQuestionFirebase } from "../firebaseApi"
+import {
+  fetchDailyQuestion as fetchDailyQuestionFirebase,
+  fetchLatestGradingResultForQuestion,
+} from "../firebaseApi"
+import { useUser } from "./UserContext"
 
 export default function HomeScreen() {
   const router = useRouter()
-  const [refreshing, setRefreshing] = useState(false)
+  const { user } = useUser()
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["daily-question"],
     queryFn: fetchDailyQuestionFirebase,
+  })
+
+  // Fetch previous grading result for today if available
+  const {
+    data: previousGradingResult,
+    isLoading: loadingPrevGrade,
+    refetch: refetchPrevGrade,
+  } = useQuery({
+    queryKey: ["grading-result", user?.userId, data?.id],
+    queryFn: () => fetchLatestGradingResultForQuestion(user!.userId, data!.id),
+    enabled: !!user && !!data?.id,
   })
 
   // Timer logic (unchanged)
@@ -54,9 +69,8 @@ export default function HomeScreen() {
 
   // Pull to refresh handler
   const onRefresh = async () => {
-    setRefreshing(true)
     await refetch()
-    setRefreshing(false)
+    await refetchPrevGrade()
   }
 
   return (
@@ -95,7 +109,7 @@ export default function HomeScreen() {
         style={{ marginTop: 30 }}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing || isFetching}
+            refreshing={loadingPrevGrade || isFetching}
             onRefresh={onRefresh}
             tintColor="#4CAF50"
           />
@@ -180,6 +194,48 @@ export default function HomeScreen() {
                 <Text style={styles.timerLabel}>Seconds</Text>
               </View>
             </View>
+            {/* Previous Grading Result Card */}
+            {previousGradingResult && (
+              <View style={styles.prevGradeCard}>
+                <Text style={styles.prevGradeTitle}>Your Current Grade</Text>
+                <Text
+                  style={[
+                    styles.prevGradeScore,
+                    {
+                      color:
+                        previousGradingResult.score >= 90
+                          ? "#43B649"
+                          : previousGradingResult.score >= 70
+                          ? "#FFA500"
+                          : "#F44336",
+                    },
+                  ]}
+                >
+                  {previousGradingResult.score}/100
+                </Text>
+                {Array.isArray(previousGradingResult.feedback) &&
+                  previousGradingResult.feedback.length > 0 && (
+                    <View style={{ marginTop: 8 }}>
+                      {previousGradingResult.feedback.map((item) => {
+                        const key = `${item.title}-${item.type}-${item.text}`
+                        let color = "#FFA500"
+                        if (item.type === "success") color = "#43B649"
+                        else if (item.type === "error") color = "#F44336"
+                        return (
+                          <View key={key} style={styles.prevFeedbackItem}>
+                            <Text style={[styles.prevFeedbackTitle, { color }]}>
+                              {item.title}
+                            </Text>
+                            <Text style={styles.prevFeedbackText}>
+                              {item.text}
+                            </Text>
+                          </View>
+                        )
+                      })}
+                    </View>
+                  )}
+              </View>
+            )}
           </View>
         )}
       </ScrollView>
@@ -188,14 +244,24 @@ export default function HomeScreen() {
       <View style={styles.buttonContainer}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Submit Solution"
+          accessibilityLabel={
+            previousGradingResult ? "Try Again" : "Submit Solution"
+          }
           style={({ pressed }) => [
             styles.submitButtonWrapper,
             pressed && styles.submitButtonPressed,
           ]}
           onPress={() => router.push("/submit-solution")}
         >
-          <Text style={styles.buttonText}>Submit Solution</Text>
+          <FontAwesome
+            name={previousGradingResult ? "refresh" : "send"}
+            size={20}
+            color="#fff"
+            style={{ marginRight: 8 }}
+          />
+          <Text style={styles.buttonText}>
+            {previousGradingResult ? "Try Again" : "Submit Solution"}
+          </Text>
         </Pressable>
         <Pressable
           style={styles.historyButtonWrapper}
@@ -283,6 +349,44 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "bold",
   },
+  prevGradeCard: {
+    backgroundColor: "#F1F8E9",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  prevGradeTitle: {
+    fontFamily: "Lexend",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 4,
+    color: "#222",
+  },
+  prevGradeScore: {
+    fontFamily: "Lexend",
+    fontWeight: "bold",
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  prevFeedbackItem: {
+    marginBottom: 8,
+  },
+  prevFeedbackTitle: {
+    fontFamily: "Lexend",
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+  prevFeedbackText: {
+    fontFamily: "Lexend",
+    color: "#222",
+    fontSize: 14,
+    marginTop: 2,
+  },
   buttonContainer: {
     position: "absolute",
     bottom: 20,
@@ -298,6 +402,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     marginRight: 10,
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
   },
   submitButtonPressed: {

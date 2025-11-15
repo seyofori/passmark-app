@@ -5,7 +5,11 @@ import { Stack } from "expo-router"
 import { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Text, View } from "react-native"
 import "react-native-get-random-values"
-import { AppUser, ensureAnonymousSignIn, getOrCreateUser } from "../userSession"
+import {
+  AppUser,
+  ensureAnonymousSignIn,
+  getOrCreateUser,
+} from "../utils/userSession"
 import { UserProvider } from "./UserContext"
 
 const queryClient = new QueryClient()

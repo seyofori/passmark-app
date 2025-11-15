@@ -1,7 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons"
 import { useQuery } from "@tanstack/react-query"
-import { Stack, useRouter, useLocalSearchParams } from "expo-router"
-import { useUser } from "./UserContext"
+import { Stack, useLocalSearchParams, useRouter } from "expo-router"
 import React from "react"
 import {
   Pressable,
@@ -15,6 +14,7 @@ import {
   fetchGradingResult as fetchGradingResultFirebase,
   GradingResult,
 } from "../firebaseApi"
+import { useUser } from "./UserContext"
 
 function getGradeColor(grade: number) {
   if (grade >= 90) return "#43B649"
@@ -142,7 +142,9 @@ export default function GradingResultScreen() {
               else if (item.type === "error") color = "#F44336"
               return (
                 <View key={key} style={styles.feedbackItem}>
-                  <Text style={[styles.feedbackTitle, { color }]}>{item.title}</Text>
+                  <Text style={[styles.feedbackTitle, { color }]}>
+                    {item.title}
+                  </Text>
                   <Text style={styles.feedbackText}>{item.text}</Text>
                 </View>
               )

@@ -12,34 +12,12 @@ import {
   orderBy,
   query,
   where,
+  serverTimestamp,
 } from "firebase/firestore"
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { z } from "zod"
-import { ai, db, storage } from "./firebaseConfig"
+import { ai, db } from "./firebaseConfig"
 
 // Submit solution for AI grading
-
-// --- Helper Functions ---
-async function uploadImagesToStorage(
-  userId: string,
-  questionId: string,
-  imageUris: string[],
-): Promise<string[]> {
-  const uploadedUrls: string[] = []
-  for (let i = 0; i < imageUris.length; i++) {
-    const uri = imageUris[i]
-    const response = await fetch(uri)
-    const blob = await response.blob()
-    const storageRef = ref(
-      storage,
-      `solutions/${userId}/${questionId}/${Date.now()}_${i}.jpg`,
-    )
-    await uploadBytes(storageRef, blob)
-    const downloadUrl = await getDownloadURL(storageRef)
-    uploadedUrls.push(downloadUrl)
-  }
-  return uploadedUrls
-}
 
 async function fileToGenerativePart(uri: string, mimeType: string) {
   const base64 = await readAsStringAsync(uri, { encoding: "base64" })
@@ -114,23 +92,25 @@ async function runAiGrading(
   return validationSchema.parse(JSON.parse(response))
 }
 
-async function saveGradingResultToFirestore(
-  userId: string,
-  questionId: string,
-  uploadedUrls: string[],
-  score: number,
-  feedback: FeedbackItem[],
-): Promise<string> {
+async function saveGradingResultToFirestore(params: {
+  userId: string
+  questionId: string
+  uploadedUrls: string[]
+  score: number
+  feedback: FeedbackItem[]
+  question: string
+}): Promise<string> {
+  const { userId, questionId, score, feedback, question } = params
   const gradingResultsCol = collection(db, "users", userId, "gradingResults")
   const { addDoc } = await import("firebase/firestore")
   const docRef = await addDoc(gradingResultsCol, {
     userId,
     questionId,
-    imageUrls: uploadedUrls,
-    createdAt: new Date().toISOString(),
-    status: "complete",
+    imageUrls: [],
+    createdAt: serverTimestamp(),
     score,
     feedback,
+    question,
   })
   return docRef.id
 }
@@ -147,24 +127,18 @@ export async function submitSolutionForGrading({
   imageUris: string[]
 }): Promise<{ gradingResultId: string }> {
   try {
-    // 1. Upload images
-    const uploadedUrls = await uploadImagesToStorage(
-      userId,
-      questionId,
-      imageUris,
-    )
-
     // 2. AI Grading
     const { score, feedback } = await runAiGrading(imageUris, question)
 
     // 3. Save grading result
-    const gradingResultId = await saveGradingResultToFirestore(
+    const gradingResultId = await saveGradingResultToFirestore({
       userId,
       questionId,
-      uploadedUrls,
+      uploadedUrls: [],
       score,
       feedback,
-    )
+      question,
+    })
 
     // 4. Return the grading result id
     return { gradingResultId }
@@ -218,7 +192,7 @@ export async function fetchDailyQuestion(): Promise<DailyQuestion> {
 // Fetch user history (example: from a 'history' collection)
 export async function fetchHistory(userId: string): Promise<HistoryItem[]> {
   const q = query(
-    collection(db, "users", userId, "history"),
+    collection(db, "users", userId, "gradingResults"),
     orderBy("date", "desc"),
   )
   const snapshot = await getDocs(q)
@@ -235,14 +209,14 @@ export async function fetchHistory(userId: string): Promise<HistoryItem[]> {
 // Fetch details for a specific question in history
 export async function fetchHistoryDetail(
   userId: string,
-  questionId: string,
+  gradingResultId: string,
 ): Promise<HistoryDetail> {
-  const docRef = doc(db, "users", userId, "history", questionId)
-  const docSnap = await getDoc(docRef)
-  if (!docSnap.exists()) throw new Error("History detail not found")
-  const data = docSnap.data() as DocumentData
+  const docRef = doc(db, "users", userId, "gradingResults", gradingResultId)
+  const snapshot = await getDoc(docRef)
+  if (!snapshot.exists()) throw new Error("History detail not found")
+  const data = snapshot.data() as DocumentData
   return {
-    id: docSnap.id,
+    id: snapshot.id,
     date: data.date as string,
     ...data,
   }
@@ -263,5 +237,23 @@ export async function fetchGradingResult(
     feedback: Array.isArray(data.feedback) ? data.feedback : [],
     ...data,
   }
+}
+
+// Fetch the latest grading result for a user and questionId
+export async function fetchLatestGradingResultForQuestion(
+  userId: string,
+  questionId: string,
+): Promise<GradingResult | null> {
+  const gradingResultsCol = collection(db, "users", userId, "gradingResults")
+  const q = query(
+    gradingResultsCol,
+    where("questionId", "==", questionId),
+    orderBy("createdAt", "desc"),
+    limit(1),
+  )
+  const snapshot = await getDocs(q)
+  if (snapshot.empty) return null
+  const doc = snapshot.docs[0]
+  return { id: doc.id, ...doc.data() } as GradingResult
 }
 

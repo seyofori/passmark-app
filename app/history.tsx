@@ -27,6 +27,7 @@ export default function HistoryScreen() {
   const userId = user?.userId
   const {
     data: historyData,
+    error,
     isLoading,
     isError,
     refetch,

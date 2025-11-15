@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react"
-import { AppUser } from "../userSession"
+import { AppUser } from "../utils/userSession"
 
 export type UserContextType = {
   user: AppUser | null
