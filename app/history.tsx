@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
+import { format, isThisWeek, isToday, isYesterday } from "date-fns"
 import { Stack, useRouter } from "expo-router"
-import React from "react"
+import React, { useEffect } from "react"
 import {
   FlatList,
   Pressable,
@@ -27,7 +28,7 @@ export default function HistoryScreen() {
   const userId = user?.userId
   const {
     data: historyData,
-    error,
+    error, //TODO: report this error to logging service in future
     isLoading,
     isError,
     refetch,
@@ -117,20 +118,37 @@ export default function HistoryScreen() {
                 }}
               />
               <View style={styles.infoContainer}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.date}>{item.date}</Text>
+                <Text style={styles.title}>{item.question}</Text>
+                <Text style={styles.date}>
+                  {(() => {
+                    const dateObj = new Date(item.createdAt)
+                    if (isToday(dateObj)) return "Today"
+                    if (isYesterday(dateObj)) return "Yesterday"
+                    if (isThisWeek(dateObj, { weekStartsOn: 1 }))
+                      return format(dateObj, "EEEE")
+                    return format(dateObj, "MMM d, yyyy")
+                  })()}
+                </Text>
               </View>
               <View
                 style={[
                   styles.gradeBadge,
-                  { backgroundColor: getGradeColor(item.grade) },
+                  { backgroundColor: getGradeColor(item.score) },
                 ]}
               >
-                <Text style={styles.gradeText}>{item.grade}/100</Text>
+                <Text style={styles.gradeText}>{item.score}/100</Text>
               </View>
             </Pressable>
           )}
-          contentContainerStyle={{ paddingBottom: 32 }}
+          contentContainerStyle={styles.flatListContent}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>No history yet.</Text>
+              <Text style={styles.emptySubtitle}>
+                Your solved questions will appear here.
+              </Text>
+            </View>
+          }
           refreshControl={
             <RefreshControl
               refreshing={isFetching}
@@ -199,6 +217,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     fontSize: 16,
+  },
+  flatListContent: {
+    paddingBottom: 32,
+    flexGrow: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyTitle: {
+    fontFamily: "Lexend",
+    fontSize: 18,
+  },
+  emptySubtitle: {
+    fontFamily: "Lexend",
+    fontSize: 14,
+    opacity: 0.5,
+    marginTop: 8,
   },
 })
 

@@ -27,6 +27,7 @@ export default function HomeScreen() {
 
   // Fetch previous grading result for today if available
   const {
+    error, // TODO: report this error to the logging service in future
     data: previousGradingResult,
     isLoading: loadingPrevGrade,
     refetch: refetchPrevGrade,

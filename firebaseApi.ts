@@ -11,8 +11,9 @@ import {
   limit,
   orderBy,
   query,
-  where,
   serverTimestamp,
+  setDoc,
+  where,
 } from "firebase/firestore"
 import { z } from "zod"
 import { ai, db } from "./firebaseConfig"
@@ -76,7 +77,7 @@ async function runAiGrading(
   const gradingPrompt = getGradingPrompt(question)
   const responseSchema = getResponseSchema()
   const model = getGenerativeModel(ai, {
-    model: "gemini-2.5-pro",
+    model: "gemini-2.5-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema,
@@ -102,16 +103,43 @@ async function saveGradingResultToFirestore(params: {
 }): Promise<string> {
   const { userId, questionId, score, feedback, question } = params
   const gradingResultsCol = collection(db, "users", userId, "gradingResults")
-  const { addDoc } = await import("firebase/firestore")
-  const docRef = await addDoc(gradingResultsCol, {
-    userId,
-    questionId,
-    imageUrls: [],
-    createdAt: serverTimestamp(),
-    score,
-    feedback,
-    question,
-  })
+  // Query for existing gradingResult for this user/question
+  const q = query(
+    gradingResultsCol,
+    where("questionId", "==", questionId),
+    limit(1),
+  )
+  const snapshot = await getDocs(q)
+  let docRef
+  if (!snapshot.empty) {
+    // Update existing doc
+    docRef = snapshot.docs[0].ref
+    await setDoc(
+      docRef,
+      {
+        userId,
+        questionId,
+        imageUrls: [],
+        createdAt: serverTimestamp(),
+        score,
+        feedback,
+        question,
+      },
+      { merge: true },
+    )
+  } else {
+    // Add new doc
+    const { addDoc } = await import("firebase/firestore")
+    docRef = await addDoc(gradingResultsCol, {
+      userId,
+      questionId,
+      imageUrls: [],
+      createdAt: serverTimestamp(),
+      score,
+      feedback,
+      question,
+    })
+  }
   return docRef.id
 }
 
@@ -157,8 +185,9 @@ export interface DailyQuestion {
 
 export interface HistoryItem {
   id: string
-  date: string
-  [key: string]: any
+  createdAt: string
+  question: string
+  score: number
 }
 
 export interface HistoryDetail extends HistoryItem {
@@ -193,33 +222,19 @@ export async function fetchDailyQuestion(): Promise<DailyQuestion> {
 export async function fetchHistory(userId: string): Promise<HistoryItem[]> {
   const q = query(
     collection(db, "users", userId, "gradingResults"),
-    orderBy("date", "desc"),
+    orderBy("createdAt", "desc"),
   )
   const snapshot = await getDocs(q)
   return snapshot.docs.map((doc) => {
     const data = doc.data() as DocumentData
     return {
-      id: doc.id,
-      date: data.date as string,
       ...data,
+      id: doc.id,
+      createdAt: data.createdAt?.toDate?.()?.toISOString() ?? "",
+      question: data.question,
+      score: typeof data.score === "number" ? data.score : 0,
     }
   })
-}
-
-// Fetch details for a specific question in history
-export async function fetchHistoryDetail(
-  userId: string,
-  gradingResultId: string,
-): Promise<HistoryDetail> {
-  const docRef = doc(db, "users", userId, "gradingResults", gradingResultId)
-  const snapshot = await getDoc(docRef)
-  if (!snapshot.exists()) throw new Error("History detail not found")
-  const data = snapshot.data() as DocumentData
-  return {
-    id: snapshot.id,
-    date: data.date as string,
-    ...data,
-  }
 }
 
 // Fetch grading result (example: from a 'gradingResults' collection)
@@ -244,9 +259,8 @@ export async function fetchLatestGradingResultForQuestion(
   userId: string,
   questionId: string,
 ): Promise<GradingResult | null> {
-  const gradingResultsCol = collection(db, "users", userId, "gradingResults")
   const q = query(
-    gradingResultsCol,
+    collection(db, "users", userId, "gradingResults"),
     where("questionId", "==", questionId),
     orderBy("createdAt", "desc"),
     limit(1),
