@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useFonts } from "expo-font"
-import * as Notifications from "expo-notifications"
 import { Stack } from "expo-router"
 import { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Text, View } from "react-native"
@@ -87,7 +86,7 @@ export default function RootLayout() {
   }
 
   return (
-    <UserProvider value={{ user }}>
+    <UserProvider>
       <QueryClientProvider client={queryClient}>
         <View style={{ flex: 1 }}>
           <Stack

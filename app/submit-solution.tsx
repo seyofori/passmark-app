@@ -21,7 +21,7 @@ export default function SubmitSolutionScreen() {
   const [images, setImages] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const router = useRouter()
-  const { user } = useUser()
+  const { user, refreshUser } = useUser()
   const { data: dailyQuestion, isLoading: loadingQuestion } = useQuery({
     queryKey: ["daily-question"],
     queryFn: fetchDailyQuestion,
@@ -50,7 +50,10 @@ export default function SubmitSolutionScreen() {
     if (images.length >= 5) return
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (status !== "granted") {
-      Alert.alert("Permission Required", "Gallery permission is required to upload images.")
+      Alert.alert(
+        "Permission Required",
+        "Gallery permission is required to upload images.",
+      )
       return
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -151,6 +154,7 @@ export default function SubmitSolutionScreen() {
                 question: dailyQuestion.question,
                 imageUris: images,
               })
+              await refreshUser() // Refresh user context after streak update
               setSubmitting(false)
               router.push(`/grading-result?id=${gradingResultId}`)
             } catch (err: any) {

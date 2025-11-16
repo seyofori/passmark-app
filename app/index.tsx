@@ -102,12 +102,12 @@ export default function HomeScreen() {
         >
           <FontAwesome6 name="fire" size={18} color="#FF5722" />
           <Text style={[styles.streak, { marginLeft: 6 }]}>
-            {data ? `${data.streak} day streak` : "--"}
+            {user ? `${user.streak} day streak` : "--"}
           </Text>
         </View>
       </View>
       <ScrollView
-        style={{ marginTop: 30 }}
+        style={{ marginTop: 30, paddingBottom: 150 }}
         refreshControl={
           <RefreshControl
             refreshing={loadingPrevGrade || isFetching}
