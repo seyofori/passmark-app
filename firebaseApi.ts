@@ -159,7 +159,7 @@ export async function submitSolutionForGrading({
     // 2. AI Grading
     const { score, feedback } = await runAiGrading(imageUris, question)
 
-    if (score > -1) {
+    if (score > 0) {
       const user = await getOrCreateUser()
       const lastStreakDate = user.lastStreakDate
         ? new Date(user.lastStreakDate)

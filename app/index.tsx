@@ -75,7 +75,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: 100 }]}>
+    <View style={[styles.container, { paddingTop: 50 }]}>
       {/* Header */}
       <Stack.Screen
         options={{
@@ -107,7 +107,8 @@ export default function HomeScreen() {
         </View>
       </View>
       <ScrollView
-        style={{ marginTop: 30, paddingBottom: 150 }}
+        style={{ marginTop: 30, }}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={loadingPrevGrade || isFetching}
@@ -239,6 +240,7 @@ export default function HomeScreen() {
             )}
           </View>
         )}
+        <View style={{ height: 300 }} />
       </ScrollView>
 
       {/* Navigation Buttons */}
