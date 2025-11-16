@@ -155,21 +155,39 @@ export default function GradingResultScreen() {
         </View>
       </ScrollView>
       <View style={styles.bottomButtonWrapper}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.tryAgainButton,
-            pressed && { opacity: 0.8 },
-          ]}
-          onPress={() => router.back()}
-        >
-          <FontAwesome
-            name="refresh"
-            size={20}
-            color="#fff"
-            style={{ marginRight: 8 }}
-          />
-          <Text style={styles.tryAgainText}>Try Again</Text>
-        </Pressable>
+        {data.score >= 90 ? (
+          <Pressable
+            style={({ pressed }) => [
+              styles.tryAgainButton,
+              pressed && { opacity: 0.8 },
+            ]}
+            onPress={() => router.replace("/")}
+          >
+            <FontAwesome
+              name="check"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.tryAgainText}>Done</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            style={({ pressed }) => [
+              styles.tryAgainButton,
+              pressed && { opacity: 0.8 },
+            ]}
+            onPress={() => router.back()}
+          >
+            <FontAwesome
+              name="refresh"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.tryAgainText}>Try Again</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   )
