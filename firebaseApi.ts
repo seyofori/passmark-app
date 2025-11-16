@@ -242,7 +242,7 @@ export interface GradingResult {
 export async function fetchDailyQuestion(): Promise<DailyQuestion> {
   const q = query(
     collection(db, "questions"),
-    where("isToday", "==", true),
+    where("isActive", "==", true),
     limit(1),
   )
   const snapshot = await getDocs(q)

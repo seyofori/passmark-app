@@ -1,16 +1,20 @@
 {
   "expo": {
-    "name": "passmark-2",
-    "slug": "passmark-2",
+    "name": "Passmark",
+    "slug": "passmark",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "passmark2",
+    "scheme": "passmark",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.seyofori.passmark"
+      "bundleIdentifier": "com.seyofori.passmark",
+      "icon": "./assets/passmark-ios-icon.icon",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -45,6 +49,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d37e56e2-3453-4e7f-877f-8a20ad24bc0d"
+      }
     }
   }
 }

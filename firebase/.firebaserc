@@ -1,0 +1,10 @@
+{
+  "projects": {
+    "default": "passmark-dev",
+    "prod": "passmark-live",
+    "live": "passmark-live",
+    "dev": "passmark-dev"
+  },
+  "targets": {},
+  "etags": {}
+}
