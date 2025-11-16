@@ -11,8 +11,18 @@ import {
   getOrCreateUser,
 } from "../utils/userSession"
 import { UserProvider } from "./UserContext"
+import { useNotificationResponse } from "@/hooks/use-notification-response"
+import { initializeDailyNotifications } from "@/utils/notifications"
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      // Note: Individual hooks (e.g., use-challenges) can override staleTime as needed.
+    },
+  },
+})
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -21,63 +31,18 @@ export default function RootLayout() {
   const [user, setUser] = useState<AppUser | null>(null)
   const [userReady, setUserReady] = useState(false)
 
+  // Set up notification response handling
+  useNotificationResponse()
+
+  // Initialize daily notifications when app starts
   useEffect(() => {
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-        shouldShowBanner: true,
-        shouldShowList: false,
-      }),
-    })
-
-    async function setupNotification() {
-      const { status } = await Notifications.requestPermissionsAsync()
-      if (status !== "granted") {
-        Alert.alert(
-          "Notification Permission",
-          "Please enable notifications to receive daily reminders.",
-        )
-        return
-      }
-      const scheduled = await Notifications.getAllScheduledNotificationsAsync()
-      const alreadyScheduled = scheduled.some((n) => {
-        const t = n.trigger as Notifications.CalendarTriggerInput
-        return (
-          t &&
-          t.type === "calendar" &&
-          //@ts-ignore
-          t.dateComponents.hour === 7 &&
-          //@ts-ignore
-          t.dateComponents.minute === 0 &&
-          t.repeats === true
-        )
-      })
-      if (!alreadyScheduled) {
-        try {
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: "Don't lose your streak!",
-              body: "Work on today's problem to keep your math streak alive!",
-              sound: true,
-              priority: Notifications.AndroidNotificationPriority.HIGH,
-            },
-            trigger: {
-              hour: 7,
-              minute: 0,
-              repeats: true,
-            } as Notifications.CalendarTriggerInput,
-          })
-        } catch (error) {
-          console.error("Failed to schedule notification:", error)
-          Alert.alert(
-            "Notification Error",
-            "Unable to schedule daily reminder. Please check your notification permissions.",
-          )
-        }
-      }
+    const setupNotifications = async () => {
+      await initializeDailyNotifications()
     }
+    setupNotifications()
+  }, [])
 
+  useEffect(() => {
     async function setupUser() {
       try {
         const u = await getOrCreateUser()
@@ -91,7 +56,6 @@ export default function RootLayout() {
     }
 
     async function initializeApp() {
-      await setupNotification()
       await setupUser()
     }
     initializeApp()
