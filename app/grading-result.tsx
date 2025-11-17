@@ -161,7 +161,9 @@ export default function GradingResultScreen() {
               styles.tryAgainButton,
               pressed && { opacity: 0.8 },
             ]}
-            onPress={() => router.replace("/")}
+            onPress={() => {
+              router.replace("/")
+            }}
           >
             <FontAwesome
               name="check"

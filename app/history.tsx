@@ -118,7 +118,13 @@ export default function HistoryScreen() {
                 }}
               />
               <View style={styles.infoContainer}>
-                <Text style={styles.title}>{item.question}</Text>
+                <Text
+                  numberOfLines={3}
+                  ellipsizeMode="tail"
+                  style={styles.title}
+                >
+                  {item.question}
+                </Text>
                 <Text style={styles.date}>
                   {(() => {
                     const dateObj = new Date(item.createdAt)
