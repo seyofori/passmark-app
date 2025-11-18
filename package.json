@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "build:preview:ios": "eas build --profile preview --platform ios --local",
+    "build:preview:android": "eas build --profile preview --platform android --local",
     "install-command": "cfgutil install-app [insert url to file here]",
     "android": "expo run:android",
     "ios": "expo run:ios",

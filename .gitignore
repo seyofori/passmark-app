@@ -45,3 +45,6 @@ build-*
 
 # local env file
 .env
+
+#firebase
+passmark-live-firebase-adminsdk*
